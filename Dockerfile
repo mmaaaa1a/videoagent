@@ -45,15 +45,17 @@ RUN npm run build
 FROM python:3.10-slim AS backend
 
 # Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    NODE_ENV=production \
+    CUDA_VISIBLE_DEVICES="" \
+    FORCE_CPU=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
-    software-properties-common \
     git \
     ffmpeg \
     libsm6 \
@@ -61,6 +63,7 @@ RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libxrender1 \
     libglib2.0-0 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -71,7 +74,9 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-deps git+https://github.com/facebookresearch/ImageBind.git@3fcf5c9039de97f6ff5528ee4a9dce903c5979b3 && \
+    pip install --no-deps git+https://github.com/facebookresearch/pytorchvideo.git@28fe037d212663c6a24f373b94cc5d478c8c1a1d
 
 # Copy VideoRAG algorithm
 COPY VideoRAG-algorithm ./VideoRAG-algorithm
@@ -80,13 +85,13 @@ COPY VideoRAG-algorithm ./VideoRAG-algorithm
 COPY Vimo-desktop/python_backend ./python_backend
 
 # Create necessary directories
-RUN mkdir -p /app/uploads /app/storage /app/logs
+RUN mkdir -p /app/uploads /app/storage /app/logs /app/models
 
 # Copy web frontend build files
 COPY --from=web-frontend /app/web/dist ./static
 
 # Set permissions
-RUN chmod +x /app/python_backend/videorag_api.py
+RUN chmod +x /app/python_backend/videorag_web_api.py
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
