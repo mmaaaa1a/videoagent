@@ -93,7 +93,7 @@ export default function VideoUpload({ chatId, onUploadComplete, disabled = false
     }
 
     setVideos(prev => [...prev, ...newVideos])
-  }, [])
+  }
 
   const removeVideo = useCallback((id: string) => {
     setVideos(prev => prev.filter(video => video.id !== id))

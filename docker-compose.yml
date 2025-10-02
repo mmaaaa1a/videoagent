@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: videorag-web-app
     ports:
-      - "${SERVER_PORT:-64451}:${SERVER_PORT:-64451}"
+      - "${SERVER_PORT:-64451}:64451"
     volumes:
       # Mount storage directory for data persistence
       - ./storage:/app/storage
