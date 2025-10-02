@@ -8,8 +8,7 @@ services:
       target: backend  # Stop at backend stage for development
     container_name: videorag-web-dev
     ports:
-      - "64451:64451"
-      - "3000:3000"  # Development server port
+      - "${SERVER_PORT:-64451}:${SERVER_PORT:-64451}"
     volumes:
       # Mount source code for development
       - ./web:/app/web
