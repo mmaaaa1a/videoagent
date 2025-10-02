@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  videorag-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: videorag-web-app
+    ports:
+      - "${SERVER_PORT:-64451}:${SERVER_PORT:-64451}"
+    volumes:
+      # Mount storage directory for data persistence
+      - ./storage:/app/storage
+      # Mount uploads directory
+      - ./uploads:/app/uploads
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Optional: mount models directory if you have local models
+      - ./models:/app/models
+    environment:
+      # API Keys (set these in .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - ALI_DASHSCOPE_API_KEY=${ALI_DASHSCOPE_API_KEY:-}
+      - ALI_DASHSCOPE_BASE_URL=${ALI_DASHSCOPE_BASE_URL:-}
+      # Model configurations
+      - ANALYSIS_MODEL=${ANALYSIS_MODEL:-gpt-4}
+      - PROCESSING_MODEL=${PROCESSING_MODEL:-gpt-3.5-turbo}
+      - CAPTION_MODEL=${CAPTION_MODEL:-qwen-vl-plus}
+      - ASR_MODEL=${ASR_MODEL:-whisper-1}
+      # ImageBind model path
+      - IMAGEBIND_MODEL_PATH=${IMAGEBIND_MODEL_PATH:-/app/models/imagebind.pth}
+      # Storage path
+      - BASE_STORAGE_PATH=${BASE_STORAGE_PATH:-/app/storage}
+      # Server configuration
+      - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
+      - SERVER_PORT=${SERVER_PORT:-64451}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SERVER_PORT:-64451}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # GPU support (uncomment if you have NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  videorag-storage:
+    driver: local
+  videorag-uploads:
+    driver: local
+  videorag-logs:
+    driver: local

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  videorag-web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend  # Stop at backend stage for development
+    container_name: videorag-web-dev
+    ports:
+      - "64451:64451"
+      - "3000:3000"  # Development server port
+    volumes:
+      # Mount source code for development
+      - ./web:/app/web
+      - ./VideoRAG-algorithm:/app/VideoRAG-algorithm
+      - ./Vimo-desktop/python_backend:/app/python_backend
+      # Mount data directories
+      - ./storage:/app/storage
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./models:/app/models
+    environment:
+      # Development environment variables
+      - NODE_ENV=development
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      # API Keys (set these in .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
+      - ALI_DASHSCOPE_API_KEY=${ALI_DASHSCOPE_API_KEY:-}
+      - ALI_DASHSCOPE_BASE_URL=${ALI_DASHSCOPE_BASE_URL:-}
+      # Model configurations
+      - ANALYSIS_MODEL=${ANALYSIS_MODEL:-gpt-4}
+      - PROCESSING_MODEL=${PROCESSING_MODEL:-gpt-3.5-turbo}
+      - CAPTION_MODEL=${CAPTION_MODEL:-qwen-vl-plus}
+      - ASR_MODEL=${ASR_MODEL:-whisper-1}
+      # ImageBind model path
+      - IMAGEBIND_MODEL_PATH=${IMAGEBIND_MODEL_PATH:-/app/models/imagebind.pth}
+      # Storage path
+      - BASE_STORAGE_PATH=${BASE_STORAGE_PATH:-/app/storage}
+      # Server configuration
+      - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
+      - SERVER_PORT=${SERVER_PORT:-64451}
+    command: /bin/bash -c "cd /app/web && npm run dev & cd /app && python python_backend/videorag_web_api.py"
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
