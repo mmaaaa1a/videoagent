@@ -37,46 +37,130 @@ export function validateVideoFile(file: File): boolean {
   return allowedTypes.includes(file.type) && file.size <= maxSize
 }
 
+// 获取视频错误的详细信息
+function getVideoErrorDetails(event: Event, video: HTMLVideoElement): string {
+  const videoError = video.error
+  if (!videoError) return '未知视频错误'
+
+  switch (videoError.code) {
+    case MediaError.MEDIA_ERR_ABORTED:
+      return '视频加载被用户取消'
+    case MediaError.MEDIA_ERR_NETWORK:
+      return '网络错误导致视频无法加载'
+    case MediaError.MEDIA_ERR_DECODE:
+      return '视频解码失败，可能是不支持的编码格式'
+    case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+      return '不支持的视频格式或文件损坏'
+    default:
+      return `视频错误 (代码: ${videoError.code})`
+  }
+}
+
 export function getVideoThumbnail(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
+    // 文件完整性检查
+    if (!file || file.size === 0) {
+      reject(new Error('文件为空或无效'))
+      return
+    }
+
     const video = document.createElement('video')
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
 
-    video.preload = 'metadata'
-    video.src = URL.createObjectURL(file)
+    // 改为none避免自动加载，使用手动控制
+    video.preload = 'none'
+    video.muted = true // 避免自动播放限制
 
+    // 超时机制 - 10秒
+    const timeoutId = setTimeout(() => {
+      if (video.src) URL.revokeObjectURL(video.src)
+      video.remove()
+      reject(new Error('视频加载超时，请检查文件是否损坏'))
+    }, 10000)
+
+    // 改进的事件处理
     video.onloadeddata = () => {
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+      clearTimeout(timeoutId)
 
-      // Seek to 1 second (or first frame if shorter)
-      const seekTime = Math.min(1, video.duration)
-      video.currentTime = seekTime
+      try {
+        // 检查视频是否有有效的尺寸
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+          throw new Error('视频尺寸无效')
+        }
+
+        // Set canvas dimensions to match video
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+
+        // Seek to 1 second (or first frame if shorter)
+        const seekTime = Math.min(1, video.duration)
+        video.currentTime = seekTime
+      } catch (error) {
+        cleanup()
+        reject(new Error(`视频处理失败: ${error.message}`))
+      }
     }
 
     video.onseeked = () => {
-      // Draw the video frame to canvas
-      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
+      try {
+        // Draw the video frame to canvas
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-      // Convert to blob and then to URL
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob)
-          resolve(url)
-        } else {
-          reject(new Error('Failed to generate thumbnail'))
-        }
-      }, 'image/jpeg', 0.8)
-
-      // Cleanup
-      URL.revokeObjectURL(video.src)
+        // Convert to blob and then to URL
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob)
+            cleanup()
+            resolve(url)
+          } else {
+            cleanup()
+            reject(new Error('缩略图生成失败，请重试'))
+          }
+        }, 'image/jpeg', 0.8)
+      } catch (error) {
+        cleanup()
+        reject(new Error(`缩略图绘制失败: ${error.message}`))
+      }
     }
 
-    video.onerror = () => {
-      reject(new Error('Failed to load video'))
-      URL.revokeObjectURL(video.src)
+    video.onerror = (event) => {
+      clearTimeout(timeoutId)
+      const errorDetails = getVideoErrorDetails(event, video)
+      cleanup()
+      reject(new Error(errorDetails))
+    }
+
+    // 添加canplay事件作为备选
+    video.oncanplay = () => {
+      // 如果onloadeddata未触发但canplay触发，尝试继续处理
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        try {
+          canvas.width = video.videoWidth
+          canvas.height = video.videoHeight
+          const seekTime = Math.min(1, video.duration)
+          video.currentTime = seekTime
+        } catch (error) {
+          cleanup()
+          reject(new Error(`视频播放就绪但处理失败: ${error.message}`))
+        }
+      }
+    }
+
+    // 清理函数
+    const cleanup = () => {
+      if (video.src) URL.revokeObjectURL(video.src)
+      video.remove()
+    }
+
+    // 设置视频源并开始加载
+    try {
+      video.src = URL.createObjectURL(file)
+      video.load() // 手动触发加载
+    } catch (error) {
+      clearTimeout(timeoutId)
+      cleanup()
+      reject(new Error(`视频源设置失败: ${error.message}`))
     }
   })
 }

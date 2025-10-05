@@ -1,6 +1,36 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:64451'
+// 动态检测当前访问地址，支持localhost和IP地址
+const getApiBaseUrl = () => {
+  // 如果有环境变量配置，优先使用
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL
+  }
+
+  // 生产环境使用相对路径
+  if (import.meta.env.PROD) {
+    return ''
+  }
+
+  // 开发环境自动检测当前访问地址
+  const currentHost = window.location.hostname
+  const apiPort = import.meta.env.VITE_API_PORT || 64451
+
+  // 如果是localhost，使用localhost
+  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+    return `http://localhost:${apiPort}`
+  }
+
+  // 如果是IP地址，使用相同的IP
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(currentHost)) {
+    return `http://${currentHost}:${apiPort}`
+  }
+
+  // 其他情况使用默认配置
+  return `http://localhost:${apiPort}`
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -40,7 +70,8 @@ export interface VideoRAGConfig {
   analysisModel: string
   processingModel: string
   caption_model: string
-  asr_model: string
+  asr_mode: string  // 'local' 或 'api'
+  asr_model: string // local模式: large-v3等，api模式: paraformer-realtime-v2等
   image_bind_model_path: string
   base_storage_path: string
 }
@@ -112,6 +143,51 @@ export interface SystemStatus {
   error?: string
 }
 
+export interface VideoItem {
+  type: 'file' | 'directory'
+  name: string
+  path: string
+  relative_path?: string
+  size?: number
+  size_mb?: number
+  modified: number
+  format?: string
+  children?: VideoItem[]
+  total_files?: number
+  total_size?: number
+  total_size_mb?: number
+  expanded?: boolean
+  selected?: boolean
+}
+
+export interface AvailableVideosResponse {
+  success: boolean
+  structure: {
+    base_path: string
+    items: VideoItem[]
+    total_items: number
+  }
+  error?: string
+}
+
+export interface DefaultConfigResponse {
+  success: boolean
+  defaults: {
+    openai_base_url: string
+    openai_api_key: string
+    processing_model: string
+    analysis_model: string
+    dashscope_api_key: string
+    dashscope_base_url: string
+    caption_model: string
+    asr_model: string
+    store_directory: string
+    imagebind_model_directory: string
+    selected_imagebind_model: string
+  }
+  error?: string
+}
+
 // API Functions
 export const videoRAGApi = {
   // Health check
@@ -124,11 +200,24 @@ export const videoRAGApi = {
   // Initialize system
   initializeSystem: (config: VideoRAGConfig) =>
     api.post<InitializeResponse>('/api/initialize', config),
+  // Update system configuration
+  updateSystemConfig: (config: VideoRAGConfig) =>
+    api.post<InitializeResponse>('/api/config/update', config),
+
+  // Get available videos for selection
+  getAvailableVideos: () =>
+    api.get<AvailableVideosResponse>('/api/videos/available'),
 
   // Upload videos
   uploadVideos: (chatId: string, videoPathList: string[]) =>
     api.post<UploadResponse>(`/api/sessions/${chatId}/videos/upload`, {
       video_path_list: videoPathList,
+    }),
+
+  // Upload videos via web interface (for file picker results)
+  uploadVideosWeb: (chatId: string, selectedFiles: string[]) =>
+    api.post<UploadResponse>(`/api/sessions/${chatId}/videos/upload-web`, {
+      uploaded_files: selectedFiles.map(path => ({ file_path: path }))
     }),
 
   // Get session status
@@ -162,4 +251,7 @@ export const videoRAGApi = {
 
   // Release ImageBind model
   releaseImageBind: () => api.post('/api/imagebind/release'),
+
+  // Get VideoRAG default configuration
+  getDefaultConfig: () => api.get<DefaultConfigResponse>('/api/videorag/defaults'),
 }

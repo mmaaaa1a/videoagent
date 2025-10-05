@@ -4,16 +4,17 @@ services:
   videorag-web-dev:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       target: backend  # Stop at backend stage for development
     container_name: videorag-web-dev
     ports:
+      - "${WEB_DEV_PORT:-3001}:3000"
       - "${SERVER_PORT:-64451}:64451"
     volumes:
       # Mount source code for development
       - ./web:/app/web
       - ./VideoRAG-algorithm:/app/VideoRAG-algorithm
-      - ./Vimo-desktop/python_backend:/app/python_backend
+      - ./backend:/app/backend
       # Mount data directories
       - ./storage:/app/storage
       - ./uploads:/app/uploads
@@ -24,6 +25,8 @@ services:
       - NODE_ENV=development
       - FLASK_ENV=development
       - FLASK_DEBUG=1
+      # glibc compatibility
+      - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}
       # API Keys (set these in .env file)
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-}
@@ -38,10 +41,18 @@ services:
       - IMAGEBIND_MODEL_PATH=${IMAGEBIND_MODEL_PATH:-/app/models/imagebind.pth}
       # Storage path
       - BASE_STORAGE_PATH=${BASE_STORAGE_PATH:-/app/storage}
+      # Frontend configuration
+      - BACKEND_API_URL=http://localhost:64451
+      - VITE_API_URL=http://192.168.1.40:64451
       # Server configuration
       - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
       - SERVER_PORT=${SERVER_PORT:-64451}
-    command: /bin/bash -c "cd /app/web && npm run dev & cd /app && python python_backend/videorag_web_api.py"
+    security_opt:
+      - seccomp:unconfined  # Allow executable stack for CTranslate2 compatibility
+    cap_add:
+      - SYS_ADMIN
+      - SYS_PTRACE
+    privileged: true
     restart: unless-stopped
     stdin_open: true
     tty: true

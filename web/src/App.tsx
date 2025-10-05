@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import InitializationWizard from './components/InitializationWizard'
-import VideoUpload from './components/VideoUpload'
+import VideoSelector from './components/VideoSelector'
 import ChatInterface from './components/ChatInterface'
-import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card'
+import SettingsPage from './pages/settings'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './components/ui/card'
 import { Button } from './components/ui/button'
-import { Settings, Upload, MessageSquare, Loader2, CheckCircle } from 'lucide-react'
+import { Settings, Upload, MessageSquare, Loader2, CheckCircle, Plus } from 'lucide-react'
 import { videoRAGApi } from './services/api'
 import { toast } from 'sonner'
 import { generateChatId } from './lib/utils'
@@ -19,7 +19,9 @@ interface ChatSession {
   status: 'ready' | 'processing' | 'completed'
 }
 
-function App() {
+// Main Chat Page Component
+function MainPage() {
+  const navigate = useNavigate()
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null)
   const [currentChatId, setCurrentChatId] = useState<string>('')
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
@@ -27,7 +29,13 @@ function App() {
   const [currentView, setCurrentView] = useState<'upload' | 'chat'>('upload')
   const [systemStatus, setSystemStatus] = useState<any>(null)
 
-  // Check initialization status on mount
+  const handleSettingsClick = () => {
+    navigate('/settings')
+  }
+
+  // Reuse the existing logic... (keeping the same implementation)
+
+  // Check configuration and initialization status on mount
   useEffect(() => {
     checkInitialization()
   }, [])
@@ -43,10 +51,36 @@ function App() {
 
   const checkInitialization = async () => {
     try {
+      // First check if we have localStorage configuration
+      const savedSettings = localStorage.getItem('videorag-settings')
+
+      // Check system status
       const response = await videoRAGApi.getSystemStatus()
+
       if (response.data.success && response.data.global_config_set) {
+        // System is properly initialized
         setIsInitialized(true)
-        // Create initial chat session
+        const newChatId = generateChatId()
+        setCurrentChatId(newChatId)
+        setChatSessions([{
+          id: newChatId,
+          createdAt: new Date(),
+          videoCount: 0,
+          status: 'ready'
+        }])
+      } else if (savedSettings) {
+        // Have localStorage settings but system not initialized - redirect to settings
+        navigate('/settings')
+      } else {
+        // Completely fresh installation - show simple welcome
+        setIsInitialized(null) // Null means show welcome guide
+      }
+    } catch (error) {
+      console.error('Failed to check initialization:', error)
+      // Fall back to localStorage check
+      const savedSettings = localStorage.getItem('videorag-settings')
+      if (savedSettings) {
+        setIsInitialized(true) // Assume initialized if we have settings
         const newChatId = generateChatId()
         setCurrentChatId(newChatId)
         setChatSessions([{
@@ -56,11 +90,8 @@ function App() {
           status: 'ready'
         }])
       } else {
-        setIsInitialized(false)
+        setIsInitialized(null) // Show welcome guide
       }
-    } catch (error) {
-      console.error('Failed to check initialization:', error)
-      setIsInitialized(false)
     } finally {
       setIsLoading(false)
     }
@@ -166,45 +197,66 @@ function App() {
     )
   }
 
-  // Show initialization wizard if not initialized
-  if (isInitialized === false) {
-    return <InitializationWizard onComplete={handleInitializationComplete} />
+  // Show welcome guide for fresh installations
+  if (isInitialized === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Settings className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">欢迎使用 VideoRAG</CardTitle>
+            <CardDescription>
+              开始您的第一个 AI 视频对话体验
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              请先到设置页面配置您的API密钥和存储路径，然后就可以开始使用VideoRAG了。
+            </p>
+            <Button onClick={() => navigate('/settings')} size="lg" className="w-full">
+              开始配置
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // Main application
+  // Main application content
   return (
-    <Router>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <MessageSquare className="w-4 h-4 text-primary-foreground" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <h1 className="text-xl font-semibold">VideoRAG</h1>
+              {systemStatus && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span>{systemStatus.total_sessions} 个会话</span>
+                  <span>•</span>
+                  <span>{systemStatus.total_indexed_videos} 个视频</span>
                 </div>
-                <h1 className="text-xl font-semibold">VideoRAG</h1>
-                {systemStatus && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <span>{systemStatus.total_sessions} 个会话</span>
-                    <span>•</span>
-                    <span>{systemStatus.total_indexed_videos} 个视频</span>
-                  </div>
-                )}
-              </div>
+              )}
+            </div>
 
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={createNewChat}>
-                  新建对话
-                </Button>
-                <Button variant="ghost" size="sm">
-                  <Settings className="w-4 h-4" />
-                </Button>
-              </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={createNewChat}>
+                新建对话
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleSettingsClick}>
+                <Settings className="w-4 h-4" />
+              </Button>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -241,16 +293,15 @@ function App() {
                   className="flex items-center gap-2"
                 >
                   <Upload className="w-4 h-4" />
-                  上传视频
+                  选择视频
                 </Button>
                 <Button
                   variant={currentView === 'chat' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => switchToChat(currentChatId)}
                   className="flex items-center gap-2"
-                  disabled={
-                    !chatSessions.find(s => s.id === currentChatId)?.videoCount
-                  }
+                  // Removed video count requirement - allow chat even without videos
+                  // Users can view history and get helpful messages about uploading videos
                 >
                   <MessageSquare className="w-4 h-4" />
                   对话
@@ -259,9 +310,9 @@ function App() {
 
               {/* Current View */}
               {currentView === 'upload' ? (
-                <VideoUpload
+                <VideoSelector
                   chatId={currentChatId}
-                  onUploadComplete={handleUploadComplete}
+                  onSubmitComplete={handleUploadComplete}
                 />
               ) : (
                 <ChatInterface chatId={currentChatId} />
@@ -277,6 +328,17 @@ function App() {
           mobileOffset={{ top: '48px' }}
         />
       </div>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/chat" replace />} />
+        <Route path="/chat" element={<MainPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Routes>
     </Router>
   )
 }

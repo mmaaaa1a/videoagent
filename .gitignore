@@ -1,3 +1,14 @@
 web/node_modules/
 web/node_modules/*
 web/node_modules
+1.md
+1panel.env
+models/imagebind.pth
+imagebind.pth
+storage
+storage/
+storage/*
+*.mp3
+venv/
+venv
+venv/*

@@ -1,0 +1,185 @@
+{
+  "name": "VideoRAG Web Application",
+  "version": "1.0.0",
+  "description": "VideoRAG - Agentic Video Understanding Platform",
+  "author": "VideoRAG Team",
+  "website": "https://github.com/your-username/videoagent",
+  "icon": "https://raw.githubusercontent.com/your-username/videoagent/main/logo.png",
+  "tags": ["video", "ai", "rag", "analysis", "llm"],
+  "docker": {
+    "image": "ghcr.io/your-username/videoagent:main",
+    "ports": [
+      {
+        "host": 64451,
+        "container": 64451,
+        "protocol": "tcp",
+        "description": "VideoRAG Web API Port"
+      }
+    ],
+    "volumes": [
+      {
+        "host": "/opt/1panel/apps/videorag/storage",
+        "container": "/app/storage",
+        "description": "Data storage directory"
+      },
+      {
+        "host": "/opt/1panel/apps/videorag/uploads",
+        "container": "/app/uploads",
+        "description": "Upload files directory"
+      },
+      {
+        "host": "/opt/1panel/apps/videorag/logs",
+        "container": "/app/logs",
+        "description": "Application logs"
+      },
+      {
+        "host": "/opt/1panel/apps/videorag/models",
+        "container": "/app/models",
+        "description": "AI models storage"
+      }
+    ],
+    "environment": [
+      {
+        "key": "NODE_ENV",
+        "value": "production",
+        "description": "Environment mode"
+      },
+      {
+        "key": "SERVER_HOST",
+        "value": "0.0.0.0",
+        "description": "Server host"
+      },
+      {
+        "key": "SERVER_PORT",
+        "value": "64451",
+        "description": "Server port"
+      },
+      {
+        "key": "OPENAI_API_KEY",
+        "value": "",
+        "required": true,
+        "description": "OpenAI API Key",
+        "secret": true
+      },
+      {
+        "key": "OPENAI_BASE_URL",
+        "value": "https://api.openai.com/v1",
+        "description": "OpenAI Base URL"
+      },
+      {
+        "key": "ALI_DASHSCOPE_API_KEY",
+        "value": "",
+        "required": true,
+        "description": "Alibaba DashScope API Key",
+        "secret": true
+      },
+      {
+        "key": "ALI_DASHSCOPE_BASE_URL",
+        "value": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "description": "DashScope Base URL"
+      },
+      {
+        "key": "ANALYSIS_MODEL",
+        "value": "gpt-4",
+        "description": "Analysis model for detailed tasks"
+      },
+      {
+        "key": "PROCESSING_MODEL",
+        "value": "gpt-3.5-turbo",
+        "description": "Processing model for bulk tasks"
+      },
+      {
+        "key": "CAPTION_MODEL",
+        "value": "qwen-vl-plus",
+        "description": "Video captioning model"
+      },
+      {
+        "key": "ASR_MODEL",
+        "value": "whisper-1",
+        "description": "Speech recognition model"
+      },
+      {
+        "key": "IMAGEBIND_MODEL_PATH",
+        "value": "/app/models/imagebind.pth",
+        "description": "ImageBind model path"
+      },
+      {
+        "key": "BASE_STORAGE_PATH",
+        "value": "/app/storage",
+        "description": "Base storage path"
+      }
+    ]
+  },
+  "health_check": {
+    "path": "/api/health",
+    "method": "GET",
+    "expected_status": 200,
+    "interval": 30,
+    "timeout": 10,
+    "retries": 3,
+    "start_period": 60
+  },
+  "requirements": {
+    "cpu": {
+      "min": 2,
+      "recommended": 4
+    },
+    "memory": {
+      "min": "4GB",
+      "recommended": "8GB"
+    },
+    "disk": {
+      "min": "10GB",
+      "recommended": "50GB"
+    }
+  },
+  "installation": {
+    "pre_install": [
+      "mkdir -p /opt/1panel/apps/videorag/storage",
+      "mkdir -p /opt/1panel/apps/videorag/uploads",
+      "mkdir -p /opt/1panel/apps/videorag/logs",
+      "mkdir -p /opt/1panel/apps/videorag/models",
+      "chown -R 1000:1000 /opt/1panel/apps/videorag"
+    ],
+    "post_install": [
+      "echo 'VideoRAG installation completed!'",
+      "echo 'Please configure your API keys in the environment variables'",
+      "echo 'Access the application at: http://your-server:64451'"
+    ]
+  },
+  "update": {
+    "strategy": "rolling",
+    "pre_update": [
+      "echo 'Starting VideoRAG update...'",
+      "docker pull ghcr.io/your-username/videoagent:main"
+    ],
+    "post_update": [
+      "echo 'VideoRAG update completed!'",
+      "docker system prune -f"
+    ]
+  },
+  "backup": {
+    "directories": [
+      "/opt/1panel/apps/videorag/storage",
+      "/opt/1panel/apps/videorag/models"
+    ],
+    "files": [
+      "/opt/1panel/apps/videorag/.env"
+    ]
+  },
+  "monitoring": {
+    "logs": [
+      {
+        "path": "/opt/1panel/apps/videorag/logs",
+        "pattern": "*.log",
+        "description": "Application logs"
+      }
+    ],
+    "metrics": {
+      "cpu": true,
+      "memory": true,
+      "disk": true,
+      "network": true
+    }
+  }
+}

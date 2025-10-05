@@ -1,19 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Send, Bot, User, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { Send, Bot, User, Loader2, AlertCircle, CheckCircle, Save } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
 import { videoRAGApi } from '../services/api'
 import { toast } from 'sonner'
 import { generateChatId } from '../lib/utils'
-
-interface Message {
-  id: string
-  type: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-  status?: 'sending' | 'sent' | 'error'
-}
+import { Message } from '../types/chat'
+import { useChatHistory } from '../hooks/useChatHistory'
 
 interface ChatInterfaceProps {
   chatId: string
@@ -21,12 +15,21 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ chatId, disabled = false }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [queryStatus, setQueryStatus] = useState<'idle' | 'processing' | 'completed' | 'error'>('idle')
+  const [currentProcessingMessage, setCurrentProcessingMessage] = useState<Message | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Use chat history hook for persistent message storage
+  const {
+    messages,
+    isLoading: isHistoryLoading,
+    error: historyError,
+    addMessage: addMessageToHistory,
+    updateMessage: updateMessageInHistory
+  } = useChatHistory(chatId)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -38,7 +41,7 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
 
   // Poll for query status
   useEffect(() => {
-    if (queryStatus === 'processing') {
+    if (queryStatus === 'processing' && currentProcessingMessage) {
       const interval = setInterval(async () => {
         try {
           const response = await videoRAGApi.getSessionStatus(chatId, 'query')
@@ -47,31 +50,28 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
 
             if (status.status === 'completed') {
               setQueryStatus('completed')
-              setMessages(prev => [
-                ...prev.slice(0, -1), // Remove processing message
-                {
-                  id: generateChatId(),
-                  type: 'assistant',
-                  content: status.answer || '抱歉，我无法回答这个问题。',
-                  timestamp: new Date(),
-                  status: 'sent'
-                }
-              ])
-              setIsLoading(false)
+              // Update processing message with final answer (don't remove, just replace content)
+              const finalAnswer = status.answer || '抱歉，我无法回答这个问题。';
+              updateMessageInHistory(currentProcessingMessage.id, {
+                type: 'assistant',
+                content: finalAnswer,
+                status: 'sent'
+              }).then(() => {
+                setCurrentProcessingMessage(null)
+                setIsLoading(false)
+              })
             } else if (status.status === 'error') {
               setQueryStatus('error')
-              setMessages(prev => [
-                ...prev.slice(0, -1), // Remove processing message
-                {
-                  id: generateChatId(),
-                  type: 'assistant',
-                  content: `错误: ${status.message}`,
-                  timestamp: new Date(),
-                  status: 'error'
-                }
-              ])
-              setIsLoading(false)
-              toast.error('查询处理失败')
+              // Update processing message with error content
+              updateMessageInHistory(currentProcessingMessage.id, {
+                type: 'assistant',
+                content: `错误: ${status.message}`,
+                status: 'error'
+              }).then(() => {
+                setCurrentProcessingMessage(null)
+                setIsLoading(false)
+                toast.error('查询处理失败')
+              })
             }
           }
         } catch (error) {
@@ -81,7 +81,7 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
 
       return () => clearInterval(interval)
     }
-  }, [queryStatus, chatId])
+  }, [queryStatus, chatId, currentProcessingMessage])
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading || disabled) return
@@ -102,12 +102,19 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
       status: 'sending'
     }
 
-    setMessages(prev => [...prev, userMessage, processingMessage])
-    setInputMessage('')
-    setIsLoading(true)
-    setQueryStatus('processing')
-
     try {
+      // Save user message to history
+      await addMessageToHistory(userMessage)
+
+      // Add processing message (temporary, will be replaced with actual response)
+      await addMessageToHistory(processingMessage)
+
+      // Store processing message ID for useEffect
+      setCurrentProcessingMessage(processingMessage)
+
+      setInputMessage('')
+      setIsLoading(true)
+      setQueryStatus('processing')
       const response = await videoRAGApi.queryVideo(chatId, userMessage.content)
 
       if (!response.data.success) {
@@ -116,16 +123,17 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
     } catch (error) {
       console.error('Query error:', error)
       setQueryStatus('error')
-      setMessages(prev => [
-        ...prev.slice(0, -1), // Remove processing message
-        {
-          id: generateChatId(),
+
+      // Replace processing message with error message
+      if (currentProcessingMessage) {
+        await updateMessageInHistory(currentProcessingMessage.id, {
           type: 'assistant',
           content: '抱歉，查询处理失败。请稍后重试。',
-          timestamp: new Date(),
           status: 'error'
-        }
-      ])
+        })
+      }
+
+      setCurrentProcessingMessage(null)
       setIsLoading(false)
       toast.error('查询失败，请重试')
     }
@@ -158,14 +166,33 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-0">
+        {/* Loading/History Error State */}
+        {isHistoryLoading && (
+          <div className="flex justify-center items-center p-6">
+            <div className="text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
+              <p className="text-sm text-muted-foreground">正在加载对话历史...</p>
+            </div>
+          </div>
+        )}
+
+        {historyError && (
+          <div className="m-4 p-4 bg-destructive/10 border border-destructive/20 rounded">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">对话历史加载失败: {historyError}</span>
+            </div>
+          </div>
+        )}
+
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.length === 0 ? (
+          {messages.length === 0 && !isHistoryLoading ? (
             <div className="text-center py-12">
               <Bot className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-medium mb-2">开始与视频对话</h3>
               <p className="text-muted-foreground">
-                上传视频后，您可以询问关于视频内容的任何问题
+                上传视频后，您可以询问关于视频内容的任何问题。您的对话将被自动保存。
               </p>
             </div>
           ) : (
@@ -206,7 +233,10 @@ export default function ChatInterface({ chatId, disabled = false }: ChatInterfac
                           <AlertCircle className="w-3 h-3 text-red-600" />
                         )}
                         <span className="text-xs opacity-70">
-                          {message.timestamp.toLocaleTimeString()}
+                          {typeof message.timestamp === 'string'
+                            ? new Date(message.timestamp).toLocaleTimeString()
+                            : message.timestamp.toLocaleTimeString()
+                          }
                         </span>
                       </div>
                     )}

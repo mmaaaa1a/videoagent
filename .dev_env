@@ -1,0 +1,8 @@
+# VideoRAG本地开发环境变量
+export PYTHONPATH="/data/项目/videoagent/VideoRAG-algorithm:/data/项目/videoagent/backend:$PYTHONPATH"
+export FLASK_ENV=development
+export FLASK_DEBUG=1
+export NODE_ENV=development
+
+# 激活虚拟环境
+source "/data/项目/videoagent/venv/bin/activate"

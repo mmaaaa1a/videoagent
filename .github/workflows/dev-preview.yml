@@ -1,0 +1,116 @@
+name: Development Preview
+
+on:
+  push:
+    branches: [ develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Build development image
+  build-dev:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=dev,enable={{is_default_branch}}
+
+    - name: Build and push development image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.dev
+        target: backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha,scope=dev
+        cache-to: type=gha,mode=max,scope=dev
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+          PNPM_VERSION=9.10.0
+
+  # Deploy development environment
+  deploy-dev:
+    needs: build-dev
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name != 'pull_request'
+
+    steps:
+    - name: Deploy to development server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.DEV_SERVER_HOST }}
+        username: ${{ secrets.DEV_SERVER_USER }}
+        key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+        port: ${{ secrets.DEV_SERVER_PORT || 22 }}
+        script: |
+          # Set variables
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          IMAGE_TAG="develop-${{ github.sha }}"
+          CONTAINER_PREFIX="videorag-dev"
+
+          echo "🚀 Starting development deployment..."
+
+          # Pull development image
+          echo "📦 Pulling development Docker image..."
+          docker pull $IMAGE_NAME:$IMAGE_TAG
+
+          # Stop and remove existing development containers
+          echo "🛑 Stopping existing development containers..."
+          docker-compose -f docker-compose.dev.yml down || true
+
+          # Update image tag
+          cd ${{ secrets.DEV_SERVER_PATH }}
+          export IMAGE_TAG=$IMAGE_TAG
+          export FRONTEND_DEV_PORT=$((5173 + $RANDOM % 100))
+          export WEB_DEV_PORT=$((3000 + $RANDOM % 100))
+          export SERVER_PORT=$((64451 + $RANDOM % 1000))
+
+          # Start development environment
+          echo "🚀 Starting development environment..."
+          docker-compose -f docker-compose.dev.yml up -d
+
+          # Wait for containers to be ready
+          echo "⏳ Waiting for services to be ready..."
+          sleep 20
+
+          # Show container status
+          echo "📊 Development environment status:"
+          docker-compose -f docker-compose.dev.yml ps
+
+          # Show access URLs
+          echo "🌐 Development URLs:"
+          echo "- Frontend (Vimo-desktop): http://localhost:$FRONTEND_DEV_PORT"
+          echo "- Web Frontend: http://localhost:$WEB_DEV_PORT"
+          echo "- Backend API: http://localhost:$SERVER_PORT"
+
+          # Show logs
+          echo "📋 Recent logs:"
+          docker-compose -f docker-compose.dev.yml logs --tail=10

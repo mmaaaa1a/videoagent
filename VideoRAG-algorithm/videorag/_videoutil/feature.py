@@ -2,6 +2,16 @@ import os
 import torch
 import pickle
 from tqdm import tqdm
+
+# Fix for torchvision compatibility before importing imagebind
+import torchvision
+import torchvision.transforms.functional as F
+import sys
+# Monkey patch the missing module
+if not hasattr(torchvision.transforms, 'functional_tensor'):
+    torchvision.transforms.functional_tensor = F
+
+# Now import imagebind after the fix
 from imagebind import data
 from imagebind.models import imagebind_model
 from imagebind.models.imagebind_model import ImageBindModel, ModalityType

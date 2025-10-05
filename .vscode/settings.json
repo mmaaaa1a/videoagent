@@ -1,0 +1,6 @@
+{
+  "autoOpenPreviewPanel.extensionEnabled": true,
+  "autoOpenPreviewPanel.openPreviewToSide": false,
+  "autoOpenPreviewPanel.languages": "",
+  "workbench.editor.enablePreviewFromQuickOpen": true
+}

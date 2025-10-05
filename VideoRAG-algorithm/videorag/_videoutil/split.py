@@ -4,7 +4,7 @@ import shutil
 import numpy as np
 from tqdm import tqdm
 from moviepy.video import fx as vfx
-from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy import VideoFileClip
 from .._utils import logger
 
 def split_video(
@@ -36,8 +36,8 @@ def split_video(
                 end = min(start + segment_length, total_video_length)
             else:
                 end = total_video_length
-            
-            subvideo = video.subclip(start, end)
+
+            subvideo = video.subclipped(start, end)
             subvideo_length = subvideo.duration
             frame_times = np.linspace(0, subvideo_length, num_frames_per_segment, endpoint=False)
             frame_times += start
@@ -50,7 +50,7 @@ def split_video(
             audio_file = f'{audio_file_base_name}.{audio_output_format}'
             try:
                 subaudio = subvideo.audio
-                subaudio.write_audiofile(os.path.join(video_segment_cache_path, audio_file), codec='mp3', verbose=False, logger=None)
+                subaudio.write_audiofile(os.path.join(video_segment_cache_path, audio_file), codec='mp3', logger=None)
             except Exception as e:
                 logger.warning(f"Warning: Failed to extract audio for video {video_name} ({start}-{end}). Probably due to lack of audio track.")
 
@@ -73,8 +73,8 @@ def saving_video_segments(
             for index in tqdm(segment_index2name, desc=f"Saving Video Segments {video_name}"):
                 start, end = segment_times_info[index]["timestamp"][0], segment_times_info[index]["timestamp"][1]
                 video_file = f'{segment_index2name[index]}.{video_output_format}'
-                subvideo = video.subclip(start, end)
-                subvideo.write_videofile(os.path.join(video_segment_cache_path, video_file), codec='libx264', verbose=False, logger=None)
+                subvideo = video.subclipped(start, end)
+                subvideo.write_videofile(os.path.join(video_segment_cache_path, video_file), codec='libx264', logger=None)
     except Exception as e:
         error_queue.put(f"Error in saving_video_segments:\n {str(e)}")
         raise RuntimeError

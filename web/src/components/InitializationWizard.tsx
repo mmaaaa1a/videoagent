@@ -21,7 +21,8 @@ export default function InitializationWizard({ onComplete }: InitializationWizar
     analysisModel: 'gpt-4',
     processingModel: 'gpt-3.5-turbo',
     caption_model: 'qwen-vl-plus',
-    asr_model: 'whisper-1',
+    asr_mode: 'local',  // 改为ASR模式选择：local 或 api
+    asr_model: 'large-v3', // 本地模式：large-v3等，API模式：parformance-realtime-v2等
     image_bind_model_path: '/app/models/imagebind.pth',
     base_storage_path: '/app/storage'
   })
@@ -45,6 +46,11 @@ export default function InitializationWizard({ onComplete }: InitializationWizar
     }
     if (!config.ali_dashscope_api_key.trim()) {
       toast.error('请输入阿里云DashScope API密钥')
+      return false
+    }
+    // API ASR模式需要验证API密钥
+    if (config.asr_mode === 'api' && !config.ali_dashscope_api_key.trim()) {
+      toast.error('API ASR模式需要配置阿里云DashScope API密钥')
       return false
     }
     return true
@@ -112,27 +118,66 @@ export default function InitializationWizard({ onComplete }: InitializationWizar
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">分析模型</label>
-              <select
+              <Input
                 value={config.analysisModel}
                 onChange={(e) => handleConfigChange('analysisModel', e.target.value)}
+                placeholder="e.g., gpt-4, custom-model"
                 className="w-full p-2 border rounded-md"
-              >
-                <option value="gpt-4">GPT-4</option>
-                <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-              </select>
+              />
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">处理模型</label>
-              <select
+              <Input
                 value={config.processingModel}
                 onChange={(e) => handleConfigChange('processingModel', e.target.value)}
+                placeholder="e.g., gpt-3.5-turbo, custom-model"
                 className="w-full p-2 border rounded-md"
-              >
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                <option value="gpt-4">GPT-4</option>
-                <option value="gpt-4-turbo">GPT-4 Turbo</option>
-              </select>
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <label className="text-sm font-medium mb-2 block">ASR语音转文本配置</label>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">ASR模式</label>
+                <select
+                  value={config.asr_mode}
+                  onChange={(e) => {
+                    const newMode = e.target.value
+                    handleConfigChange('asr_mode', newMode)
+                    // 根据模式自动设置默认模型
+                    if (newMode === 'local') {
+                      handleConfigChange('asr_model', 'large-v3')
+                    } else if (newMode === 'api') {
+                      handleConfigChange('asr_model', 'paraformer-realtime-v2')
+                    }
+                  }}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="local">本地处理（Faster-Whisper）- 100%离线</option>
+                  <option value="api">云端API（阿里云DashScope） - 需要网络和费用</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">ASR模型</label>
+                <Input
+                  value={config.asr_model}
+                  onChange={(e) => handleConfigChange('asr_model', e.target.value)}
+                  placeholder={
+                    config.asr_mode === 'local'
+                      ? "e.g., large-v3, small, medium"
+                      : "e.g., paraformer-realtime-v2, paraformer-realtime-16k-v1"
+                  }
+                  className="w-full p-2 border rounded-md"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {config.asr_mode === 'local'
+                    ? "本地Faster-Whisper模型，支持多语言，完全离线处理"
+                    : "阿里云DashScope ASR模型，支持实时语音识别，速度更快但需API调用费"
+                  }
+                </p>
+              </div>
             </div>
           </div>
         </div>

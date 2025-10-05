@@ -1,7 +1,13 @@
 import numpy as np
 
 from openai import AsyncOpenAI, AsyncAzureOpenAI, APIConnectionError, RateLimitError
-from ollama import AsyncClient
+# Optional import for ollama
+try:
+    from ollama import AsyncClient
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    AsyncClient = None
+    OLLAMA_AVAILABLE = False
 from dataclasses import asdict, dataclass, field
 
 from tenacity import (
@@ -34,10 +40,12 @@ def get_azure_openai_async_client_instance():
     return global_azure_openai_async_client
 
 def get_ollama_async_client_instance():
+    if not OLLAMA_AVAILABLE:
+        raise ImportError("Ollama is not available. Please install ollama package to use Ollama models.")
     global global_ollama_client
     if global_ollama_client is None:
         # set OLLAMA_HOST or pass in host="http://127.0.0.1:11434"
-        global_ollama_client = AsyncClient()  # Adjust base URL if necessary        
+        global_ollama_client = AsyncClient()  # Adjust base URL if necessary
     return global_ollama_client
 
 # Setup LLM Configuration.
@@ -361,7 +369,7 @@ async def ollama_embedding(model_name: str, texts: list[str]) -> np.ndarray:
 
     # Send the request to Ollama for embeddings
     response = await ollama_client.embed(
-        model=model_name,  
+        model=model_name,
         input=texts
     )
 
@@ -370,23 +378,78 @@ async def ollama_embedding(model_name: str, texts: list[str]) -> np.ndarray:
 
     return np.array(embeddings)
 
-ollama_config = LLMConfig(
-    embedding_func_raw = ollama_embedding,
-    embedding_model_name = "nomic-embed-text",
-    embedding_dim = 768,
-    embedding_max_token_size=8192,
-    embedding_batch_num = 1,
-    embedding_func_max_async = 1,
-    query_better_than_threshold = 0.2,
-    best_model_func_raw = ollama_complete ,
-    best_model_name = "gemma2:latest", # need to be a solid instruct model
-    best_model_max_token_size = 32768,
-    best_model_max_async  = 1,
-    cheap_model_func_raw = ollama_mini_complete,
-    cheap_model_name = "olmo2",
-    cheap_model_max_token_size = 32768,
-    cheap_model_max_async = 1
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((RateLimitError, APIConnectionError)),
 )
+async def dashscope_embedding(model_name: str, texts: list[str]) -> np.ndarray:
+    """DashScope 嵌入函数，支持动态配置API参数"""
+    # 从kwargs中获取配置，如果没有则使用环境变量或默认值
+    api_key = None
+    base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+    # 首先尝试从全局配置获取（类似dashscope_caption_complete的实现）
+    if hasattr(dashscope_embedding, '_global_config'):
+        global_config = dashscope_embedding._global_config
+        api_key = global_config.get('embedding_api_key')
+        if api_key is None:
+            api_key = global_config.get('ali_dashscope_api_key')
+        base_url = global_config.get('embedding_base_url')
+        if base_url is None:
+            base_url = global_config.get('ali_dashscope_base_url', base_url)
+    else:
+        # 回退到环境变量
+        import os
+        api_key = os.getenv('EMBEDDING_API_KEY') or os.getenv('ALI_DASHSCOPE_API_KEY')
+        base_url = os.getenv('EMBEDDING_BASE_URL', base_url)
+
+    if not api_key:
+        raise ValueError("DashScope API key not found. Please set EMBEDDING_API_KEY or ALI_DASHSCOPE_API_KEY")
+
+    # 创建兼容OpenAI的DashScope客户端
+    from openai import AsyncOpenAI
+    dashscope_client = AsyncOpenAI(
+        api_key=api_key,
+        base_url=base_url
+    )
+
+    # 调用embedding API
+    response = await dashscope_client.embeddings.create(
+        model=model_name,
+        input=texts,
+        encoding_format="float"
+    )
+
+    # 提取embeddings并返回numpy数组
+    return np.array([dp.embedding for dp in response.data])
+
+# 全局配置设置函数
+def set_dashscope_embedding_config(config: dict):
+    """设置dashscope_embedding函数的全局配置"""
+    dashscope_embedding._global_config = config
+
+# Ollama configuration (only available if Ollama is installed)
+if OLLAMA_AVAILABLE:
+    ollama_config = LLMConfig(
+        embedding_func_raw = ollama_embedding,
+        embedding_model_name = "nomic-embed-text",
+        embedding_dim = 768,
+        embedding_max_token_size=8192,
+        embedding_batch_num = 1,
+        embedding_func_max_async = 1,
+        query_better_than_threshold = 0.2,
+        best_model_func_raw = ollama_complete ,
+        best_model_name = "gemma2:latest", # need to be a solid instruct model
+        best_model_max_token_size = 32768,
+        best_model_max_async  = 1,
+        cheap_model_func_raw = ollama_mini_complete,
+        cheap_model_name = "olmo2",
+        cheap_model_max_token_size = 32768,
+        cheap_model_max_async = 1
+    )
+else:
+    ollama_config = None
 ###### DeepSeek Configuration
 @retry(
     stop=stop_after_attempt(5),
@@ -497,4 +560,30 @@ deepseek_bge_config = LLMConfig(
     cheap_model_max_token_size = 32768,
     cheap_model_max_async = 16
 )
+
+# Backward compatibility wrapper
+async def gpt_complete(
+        model_name, prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    """Legacy wrapper for backwards compatibility - defaults to gpt_4o_complete"""
+    return await gpt_4o_complete(
+        model_name,
+        prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        **kwargs
+    )
+
+# Backward compatibility wrapper for caption completion
+async def dashscope_caption_complete(
+        model_name, prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    """Legacy wrapper for caption completion - uses gpt_4o_complete"""
+    return await gpt_4o_complete(
+        model_name,
+        prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        **kwargs
+    )
 

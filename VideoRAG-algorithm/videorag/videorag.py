@@ -16,8 +16,14 @@ from ._llm import (
     LLMConfig,
     openai_config,
     azure_openai_config,
-    ollama_config
+    OLLAMA_AVAILABLE
 )
+
+# Import ollama_config only if available
+if OLLAMA_AVAILABLE:
+    from ._llm import ollama_config
+else:
+    ollama_config = None
 from ._op import (
     chunking_by_video_segments,
     extract_entities,
@@ -61,7 +67,7 @@ class VideoRAG:
     working_dir: str = field(
         default_factory=lambda: f"./videorag_cache_{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}"
     )
-    
+
     # video
     threads_for_split: int = 10
     video_segment_length: int = 30 # seconds
@@ -72,11 +78,20 @@ class VideoRAG:
     video_embedding_batch_num: int = 2
     segment_retrieval_top_k: int = 4
     video_embedding_dim: int = 1024
-    
+
+    # ASR configuration (new field)
+    asr_config: dict = field(default_factory=lambda: {
+        'mode': 'local',
+        'model': 'large-v3',
+        'use_epyc_optimization': True,  # EPYC优化开关
+        'epyc_num_models': 16,           # EPYC模型实例数
+        'epyc_batch_size': 32           # EPYC批量大小
+    })
+
     # query
     retrieval_topk_chunks: int = 2
     query_better_than_threshold: float = 0.2
-    
+
     # graph mode
     enable_local: bool = True
     enable_naive_rag: bool = True
@@ -199,40 +214,55 @@ class VideoRAG:
             partial(self.llm.cheap_model_func, hashing_kv=self.llm_response_cache)
         )
 
-    def insert_video(self, video_path_list=None):
+    def insert_video(self, video_path_list=None, progress_callback=None):
         loop = always_get_an_event_loop()
         for video_path in video_path_list:
             # Step0: check the existence
             video_name = os.path.basename(video_path).split('.')[0]
             if video_name in self.video_segments._data:
                 logger.info(f"Find the video named {os.path.basename(video_path)} in storage and skip it.")
+                if progress_callback:
+                    progress_callback("Video Skipped", f"Video {video_name} already exists, skipping", video_path)
                 continue
+
+            # Call progress callback for video start
+            if progress_callback:
+                progress_callback("Starting Video", f"Processing video: {video_name}", None)
             loop.run_until_complete(self.video_path_db.upsert(
                 {video_name: video_path}
             ))
             
             # Step1: split the videos
+            if progress_callback:
+                progress_callback("Splitting Video", f"Splitting video: {video_name} into segments", None)
             segment_index2name, segment_times_info = split_video(
-                video_path, 
-                self.working_dir, 
+                video_path,
+                self.working_dir,
                 self.video_segment_length,
                 self.rough_num_frames_per_segment,
                 self.audio_output_format,
             )
+            if progress_callback:
+                progress_callback("Video Split", f"Video {video_name} split into {len(segment_index2name)} segments", None)
             
-            # Step2: obtain transcript with whisper
-            transcripts = speech_to_text(
-                video_name, 
-                self.working_dir, 
+            # Step2: obtain transcript with whisper (选择ASR实现)
+            if progress_callback:
+                progress_callback("Transcribing Audio", f"Transcribing audio for video: {video_name}", None)
+            transcripts = self._get_speech_transcripts(
+                video_name,
                 segment_index2name,
                 self.audio_output_format
             )
+            if progress_callback:
+                progress_callback("Audio Transcribed", f"Audio transcription completed for video: {video_name}", None)
             
             # Step3: saving video segments **as well as** obtain caption with vision language model
+            if progress_callback:
+                progress_callback("Processing Segments", f"Processing video segments for: {video_name}", None)
             manager = multiprocessing.Manager()
             captions = manager.dict()
             error_queue = manager.Queue()
-            
+
             process_saving_video_segments = multiprocessing.Process(
                 target=saving_video_segments,
                 args=(
@@ -245,7 +275,7 @@ class VideoRAG:
                     self.video_output_format,
                 )
             )
-            
+
             process_segment_caption = multiprocessing.Process(
                 target=segment_caption,
                 args=(
@@ -258,11 +288,14 @@ class VideoRAG:
                     error_queue,
                 )
             )
-            
+
             process_saving_video_segments.start()
             process_segment_caption.start()
             process_saving_video_segments.join()
             process_segment_caption.join()
+
+            if progress_callback:
+                progress_callback("Segments Processed", f"Video segments processed and captions generated for: {video_name}", None)
             
             # if raise error in this two, stop the processing
             while not error_queue.empty():
@@ -284,11 +317,15 @@ class VideoRAG:
             ))
             
             # Step5: encode video segment features
+            if progress_callback:
+                progress_callback("Encoding Features", f"Encoding video features for: {video_name}", None)
             loop.run_until_complete(self.video_segment_feature_vdb.upsert(
                 video_name,
                 segment_index2name,
                 self.video_output_format,
             ))
+            if progress_callback:
+                progress_callback("Features Encoded", f"Video features encoded for: {video_name}", None)
             
             # Step6: delete the cache file
             video_segment_cache_path = os.path.join(self.working_dir, '_cache', video_name)
@@ -297,8 +334,80 @@ class VideoRAG:
             
             # Step 7: saving current video information
             loop.run_until_complete(self._save_video_segments())
+
+            # Final progress callback for this video
+            if progress_callback:
+                progress_callback("One Video Completed", f"Video processing completed: {video_name}", video_path)
         
         loop.run_until_complete(self.ainsert(self.video_segments._data))
+
+        # Final completion callback
+        if progress_callback:
+            progress_callback("Completed", "All videos processed successfully", None)
+
+    def _get_speech_transcripts(self, video_name, segment_index2name, audio_output_format):
+        """根据配置选择ASR实现获取语音转录"""
+        asr_mode = self.asr_config.get('mode', 'local')
+
+        if asr_mode == 'local':
+            # 使用本地faster-whisper实现
+            use_epyc = self.asr_config.get('use_epyc_optimization', False)
+            if use_epyc:
+                logger.info(f"🚀 使用EPYC 64核心优化ASR: faster-whisper ({self.asr_config.get('model', 'large-v3')})")
+            else:
+                logger.info(f"🎤 使用本地ASR: faster-whisper ({self.asr_config.get('model', 'large-v3')})")
+
+            from ._videoutil.asr import speech_to_text as local_speech_to_text
+            return local_speech_to_text(
+                video_name,
+                self.working_dir,
+                segment_index2name,
+                audio_output_format,
+                use_epyc_optimization=use_epyc
+            )
+
+        elif asr_mode == 'api':
+            # 使用DashScope API实现
+            logger.info(f"🎤 使用API ASR: {self.asr_config.get('model', 'paraformer-realtime-v2')}")
+            import sys
+            import os
+            # 添加backend路径到sys.path以导入API实现
+            backend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(self.working_dir))), 'backend')
+            if backend_path not in sys.path:
+                sys.path.insert(0, backend_path)
+
+            try:
+                import videorag as backend_videorag
+                return backend_videorag.speech_to_text(
+                    video_name,
+                    self.working_dir,
+                    segment_index2name,
+                    audio_output_format,
+                    self.asr_config  # 传递配置给API实现
+                )
+            except ImportError as e:
+                logger.error(f"❌ 无法导入API ASR实现: {str(e)}，降级到本地模式")
+                # 降级到本地实现
+                use_epyc = self.asr_config.get('use_epyc_optimization', False)
+                from ._videoutil.asr import speech_to_text as local_speech_to_text
+                return local_speech_to_text(
+                    video_name,
+                    self.working_dir,
+                    segment_index2name,
+                    audio_output_format,
+                    use_epyc_optimization=use_epyc
+                )
+        else:
+            logger.warning(f"⚠️ 未知ASR模式: {asr_mode}，使用本地模式")
+            use_epyc = self.asr_config.get('use_epyc_optimization', False)
+            from ._videoutil.asr import speech_to_text as local_speech_to_text
+            return local_speech_to_text(
+                video_name,
+                self.working_dir,
+                segment_index2name,
+                audio_output_format,
+                use_epyc_optimization=use_epyc
+            )
 
     def query(self, query: str, param: QueryParam = QueryParam()):
         loop = always_get_an_event_loop()

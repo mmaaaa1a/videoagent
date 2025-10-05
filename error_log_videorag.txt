@@ -1,0 +1,4 @@
+Video Name:test1 Error processing:
+Error in segment_caption:
+ Incorrect path_or_model_id: './MiniCPM-V-2_6-int4'. Please provide either the path to a local folder or the repo_id of a model on the Hub.
+

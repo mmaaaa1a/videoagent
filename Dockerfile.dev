@@ -1,0 +1,172 @@
+# Multi-stage Dockerfile for VideoRAG Web Development
+FROM node:20-alpine AS web-frontend
+
+# Set working directory
+WORKDIR /app/web
+
+# Copy web package files first (for better caching)
+COPY web/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy web source code
+COPY web/src ./src
+COPY web/public ./public
+COPY web/vite.config.ts ./
+COPY web/index.html ./
+COPY web/tsconfig.json ./
+COPY web/tsconfig.node.json ./
+
+# Build web frontend (optional in dev)
+# RUN npm run build
+
+
+
+# Python backend stage
+FROM python:3.10-slim AS backend
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DEBIAN_FRONTEND=noninteractive \
+    NODE_ENV=development \
+    FLASK_ENV=development \
+    FLASK_DEBUG=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libfontconfig1 \
+    libxrender1 \
+    libglib2.0-0 \
+    ca-certificates \
+    nodejs \
+    npm \
+    patchelf \
+    binutils \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install testing tools
+RUN pip install --no-cache-dir --upgrade pytest
+
+# Create app directory
+WORKDIR /app
+
+# Copy Python requirements
+COPY requirements.txt .
+
+# Configure git for better reliability
+RUN git config --global http.postBuffer 1048576000 && \
+    git config --global http.maxRequestBuffer 100M && \
+    git config --global core.compression 0 && \
+    git config --global safe.directory '/tmp/pip-req-build-*' && \
+    git config --global safe.directory '/app/*'
+
+# Install Python dependencies with fallback mechanism
+RUN pip install --no-cache-dir --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple || \
+    pip install --no-cache-dir --upgrade pip
+
+# Install base requirements with fallback (force upgrade)
+RUN pip install --no-cache-dir --upgrade -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --retries 10 --timeout 1000 || \
+    (echo "Retrying with default PyPI..." && \
+     pip install --no-cache-dir --upgrade -r requirements.txt --retries 10 --timeout 1000)
+
+# Install PyTorchVideo with fallback
+RUN pip install --no-deps pytorchvideo>=0.1.5 -i https://pypi.tuna.tsinghua.edu.cn/simple --retries 10 --timeout 1000  || \
+    (echo "Retrying PyTorchVideo installation..." && \
+     pip install --no-deps pytorchvideo>=0.1.5 --retries 10 --timeout 1000)
+
+# Copy fix scripts
+COPY docker/scripts/fix_pytorchvideo.py /app/
+COPY docker/scripts/fix_imagebind.py /app/
+COPY docker/scripts/test_glibc_compatibility.py /app/
+
+# Fix PyTorchVideo torchvision compatibility issue
+RUN python3 /app/fix_pytorchvideo.py
+
+# Install ImageBind with updated commit for torchvision compatibility
+RUN pip install --no-deps git+https://github.com/facebookresearch/ImageBind.git@e2e2e6943d0ca6aa7844aa17da77d04d78b99af5 --retries 5 --timeout 300 || \
+    (echo "Retry with latest commit..." && \
+     pip install --no-deps git+https://github.com/facebookresearch/ImageBind.git@main --retries 5 --timeout 600) || \
+    (echo "Retry with different approach..." && \
+     git clone --depth 1 https://github.com/facebookresearch/ImageBind.git /tmp/imagebind && \
+     cd /tmp/imagebind && \
+     git checkout e2e2e6943d0ca6aa7844aa17da77d04d78b99af5 && \
+     pip install -e . --no-deps)
+
+# Fix ImageBind torchvision compatibility issue
+RUN python3 /app/fix_imagebind.py
+
+# Copy VideoRAG algorithm first (needed for integration tests)
+COPY VideoRAG-algorithm ./VideoRAG-algorithm
+
+# Copy Python backend
+COPY backend ./backend
+
+# Run comprehensive glibc compatibility tests AFTER code copy (each method runs completely)
+RUN echo "=== Running comprehensive glibc compatibility tests ===" && \
+    python3 /app/test_glibc_compatibility.py
+
+# Copy web static files (optional, will be mounted)
+# COPY --from=web-frontend /app/web/dist ./static
+
+# Create necessary directories
+RUN mkdir -p /app/uploads /app/storage /app/logs /app/models
+
+# Install development dependencies
+RUN pip install --no-cache-dir watchdog flask-cors
+
+# Set permissions
+RUN chmod +x /app/backend/videorag_web_api.py
+
+# Create torchvision compatibility fix script
+RUN echo '#!/usr/bin/env python3\n\
+import sys\n\
+import torchvision\n\
+# Apply global torchvision compatibility fix\n\
+if not hasattr(torchvision.transforms, "functional_tensor"):\n\
+    import torchvision.transforms.functional as F\n\
+    torchvision.transforms.functional_tensor = F\n\
+    print("✅ Applied torchvision compatibility fix")\n\
+\n\
+# Test imports after fix\n\
+try:\n\
+    import pytorchvideo.transforms.augmentations\n\
+    print("✅ PyTorchVideo import successful")\n\
+except ImportError as e:\n\
+    print(f"❌ PyTorchVideo import failed: {e}")\n\
+\n\
+try:\n\
+    import imagebind.data\n\
+    print("✅ ImageBind import successful")\n\
+except ImportError as e:\n\
+    print(f"❌ ImageBind import failed: {e}")\n\
+' > /app/torchvision_fix.py && chmod +x /app/torchvision_fix.py
+
+# Create development startup script
+RUN echo '#!/bin/bash\n\
+# Apply torchvision compatibility fix\n\
+cd /app && python3 torchvision_fix.py\n\
+# Start frontend (Node.js/npm)\n\
+cd /app/web && npm run dev &\n\
+# Start backend (Python)\n\
+cd /app\n\
+python backend/videorag_web_api.py\n\
+' > /app/start-dev.sh && chmod +x /app/start-dev.sh
+
+# Expose ports
+EXPOSE 64451 5678
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:64451/api/health || exit 1
+
+# Development command
+CMD ["/app/start-dev.sh"]
