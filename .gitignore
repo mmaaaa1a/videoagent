@@ -12,3 +12,7 @@ storage/*
 venv/
 venv
 venv/*
+models/MiniCPM-V-2_6-int4
+models/MiniCPM-V-2_6-int4/*
+models/MiniCPM-o-2_6-gguf
+models/MiniCPM-o-2_6-gguf/*
