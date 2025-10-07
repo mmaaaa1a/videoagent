@@ -1,0 +1,656 @@
+🚀 启动VideoRAG本地开发环境...
+🔧 应用兼容性修复...
+/data/项目/videoagent/venv/lib/python3.12/site-packages/imagebind/data.py:10: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+✅ Applied torchvision compatibility fix
+ℹ️  ImageBind sample_rate issue not found or already fixed
+✅ PyTorchVideo import successful
+✅ ImageBind import successful
+✅ CTranslate2 import successful
+✅ VideoRAG import successful
+📡 启动Python后端API (端口: 64451)...
+🔍 端口64451空闲，启动后端服务...
+📝 开始监控后端日志: /data/项目/videoagent/backend/log.txt
+📝 日志监控已启动 (PID: 44316)
+⏳ 等待后端服务启动...
+[2025-10-06 22:25:31] 📝 Main process PID: 2893175
+[2025-10-06 22:25:31] ❌ Failed to start web server: [Errno 28] No space left on device
+[2025-10-06 22:25:31] 🔔 VideoRAG API server is shutting down...
+[2025-10-06 22:25:31] ✅ Cleanup completed
+[2025-10-06 22:25:55] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-06 22:25:55] ✅ 配置同步到环境变量完成
+[2025-10-06 22:25:55] 🔄 配置无变化，跳过同步
+[2025-10-06 22:26:32] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: Can't pickle local object 'index_video_worker_process.<locals>.progress_callback'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759760170.8022149, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.02 文件/秒', 'eta': '', 'resource_usage': {'cpu': '17%', 'memory': '43%'}}
+[2025-10-06 22:27:30] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: Can't pickle local object 'index_video_worker_process.<locals>.progress_callback'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759760170.8022149, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.02 文件/秒', 'eta': '', 'resource_usage': {'cpu': '17%', 'memory': '43%'}}
+[2025-10-07 09:19:20] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 16:22:59] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 16:22:59] 📝 Main process PID: 44311
+[LOG] 🚀 Starting VideoRAG Web API on port 64451
+[LOG] 📝 Main process PID: 44311
+ * Serving Flask app 'videorag_web_api'
+ * Debug mode: off
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:64451
+ * Running on http://192.168.1.40:64451
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:23:00] "GET /api/health HTTP/1.1" 200 -
+✅ 后端服务启动成功 (PID: 44311)
+🌐 启动React前端开发服务器 (端口: 3000)...
+
+> videorag-web@1.0.0 dev
+> vite --host 0.0.0.0 --port 3000
+
+16:23:00 [vite] (client) Re-optimizing dependencies because vite config has changed
+error when starting dev server:
+Error: EACCES: permission denied, unlink '/data/项目/videoagent/web/node_modules/.vite/deps/@radix-ui_react-slot.js'
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:23:09] "[31m[1mPOST /api/config HTTP/1.1[0m" 405 -
+🔍 检查服务状态...
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:23:10] "GET /api/health HTTP/1.1" 200 -
+✅ 后端API服务: http://localhost:64451
+❌ 前端开发服务未就绪
+
+🎉 VideoRAG开发环境启动完成!
+📖 前端地址: http://localhost:3000 (React + Vite)
+🔗 后端地址: http://localhost:64451 (Flask API)
+
+💡 开发提示:
+   - 修改Python代码后直接重启，无需重新构建
+   - 前端支持热重载，修改立即生效
+   - 查看后端日志: tail -f backend/log.txt
+   - 停止服务: kill 44311 44990 44316
+   - 重启服务: python3 reload_services.py
+
+按 Ctrl+C 退出...
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:23:22] "[31m[1mPUT /api/config HTTP/1.1[0m" 405 -
+[2025-10-07 16:23:34] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 16:23:34] ✅ 配置同步到环境变量完成
+[2025-10-07 16:23:34] 🔄 Global config set: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:23:34] "POST /api/config/update HTTP/1.1" 200 -
+[2025-10-07 16:23:48] 🔄 配置无变化，跳过同步
+[2025-10-07 16:23:48] 🔄 Updated global config: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:23:48] "POST /api/config/update HTTP/1.1" 200 -
+[2025-10-07 16:24:24] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 16:24:24] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 16:24:24] 🧹 Starting process cleanup...
+[2025-10-07 16:24:27] 🧹 Process manager cleanup completed
+[2025-10-07 16:24:27] ✅ Cleanup completed
+[LOG] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[LOG] ✅ 配置同步到环境变量完成
+[LOG] 🔄 Global config set: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+[LOG] 🔄 配置无变化，跳过同步
+[LOG] 🔄 Updated global config: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+[LOG] 🔔 Received signal 15, initiating shutdown...
+[LOG] 🔔 VideoRAG API server is shutting down...
+[LOG] 🧹 Starting process cleanup...
+[LOG] 🧹 Process manager cleanup completed
+[LOG] ✅ Cleanup completed
+[2025-10-07 16:25:36] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 16:25:36] 📝 Main process PID: 59374
+[2025-10-07 16:25:50] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 16:25:50] ✅ 配置同步到环境变量完成
+[2025-10-07 16:25:50] 🔄 Global config set: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+[2025-10-07 16:26:08] 🔄 配置无变化，跳过同步
+[2025-10-07 16:26:08] 🔄 Updated global config: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+[2025-10-07 16:26:21] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 16:26:21] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 16:26:21] 🧹 Starting process cleanup...
+[2025-10-07 16:26:23] 🧹 Process manager cleanup completed
+[2025-10-07 16:26:23] ✅ Cleanup completed
+[2025-10-07 16:27:41] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 16:27:41] 📝 Main process PID: 70802
+[2025-10-07 16:27:56] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 16:27:56] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 16:27:56] ✅ Cleanup completed
+[2025-10-07 16:34:44] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 16:34:44] 📝 Main process PID: 105200
+[2025-10-07 16:34:55] 🔄 Returning default configuration from environment variables
+[2025-10-07 16:34:57] ✅ 同步配置 image_bind_model_path -> IMAGEBIND_MODEL_PATH = /data/项目/videoagent/models
+[2025-10-07 16:34:57] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 16:34:57] ✅ 配置同步到环境变量完成
+[2025-10-07 16:34:57] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'asr_model': 'paraformer-v2', 'image_bind_model_path': '/data/项目/videoagent/models', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 16:34:57] ✅ ImageBind manager configured with model path: /data/项目/videoagent/models
+[2025-10-07 16:35:02] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 16:35:04] 📹 Starting video processing from web upload: 1 files
+[2025-10-07 16:35:06] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 16:35:08] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 16:35:09] 🔧 Index worker process 107502 set name to: videorag-index-8iwi2fetmg40v54o2q31zfl
+[2025-10-07 16:35:09] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing'}
+[2025-10-07 16:35:09] 🎤 ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 16:35:09] 🔗 嵌入配置: URL=https://dashscope.aliyuncs.com/compatible-mode/v1, 模型=text-embedding-v4, 维度=1024
+[2025-10-07 16:35:09] 🔍 Session status: {'status': 'processing', 'message': 'Processing video: 1759707563218-0-0-30', 'current_step': 'Starting Video', 'timestamp': 1759826109.1732287}
+[2025-10-07 16:35:09] 📊 Progress: Starting Video - Processing video: 1759707563218-0-0-30
+[2025-10-07 16:35:09] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 1759707563218-0-0-30 into segments', 'current_step': 'Splitting Video', 'timestamp': 1759826109.173756}
+[2025-10-07 16:35:09] 📊 Progress: Splitting Video - Splitting video: 1759707563218-0-0-30 into segments
+[2025-10-07 16:35:10] 🔍 Session status: {'status': 'processing', 'message': 'Video 1759707563218-0-0-30 split into 1 segments', 'current_step': 'Video Split', 'timestamp': 1759826110.4267864}
+[2025-10-07 16:35:10] 📊 Progress: Video Split - Video 1759707563218-0-0-30 split into 1 segments
+[2025-10-07 16:35:10] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'timestamp': 1759826110.4273221}
+[2025-10-07 16:35:10] 📊 Progress: Transcribing Audio - Transcribing audio for video: 1759707563218-0-0-30
+[2025-10-07 16:35:11] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826110.4273221}
+[2025-10-07 16:35:13] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826110.4273221}
+[2025-10-07 16:35:15] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826110.4273221}
+[2025-10-07 16:35:17] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826110.4273221}
+[2025-10-07 16:35:19] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826110.4273221}
+[2025-10-07 16:36:06] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 1/1 (速度: 0.02/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.02 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '20%'}, 'timestamp': 1759826166.4551413}
+[2025-10-07 16:36:06] 📊 Progress: Transcribing Audio - ASR处理中: 1/1 (速度: 0.02/秒)
+[2025-10-07 16:36:06] 🔍 Session status: {'status': 'processing', 'message': 'Audio transcription completed for video: 1759707563218-0-0-30', 'current_step': 'Audio Transcribed', 'timestamp': 1759826166.4584098}
+[2025-10-07 16:36:06] 📊 Progress: Audio Transcribed - Audio transcription completed for video: 1759707563218-0-0-30
+[2025-10-07 16:36:06] 🔍 Session status: {'status': 'processing', 'message': 'Processing video segments for: 1759707563218-0-0-30', 'current_step': 'Processing Segments', 'timestamp': 1759826166.4587953}
+[2025-10-07 16:36:06] 📊 Progress: Processing Segments - Processing video segments for: 1759707563218-0-0-30
+[2025-10-07 16:36:11] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: Can't pickle local object 'create_safe_progress_callback.<locals>.safe_callback'", 'current_step': 'Error'}
+[2025-10-07 16:36:11] ❌ Process-based video indexing failed: Can't pickle local object 'create_safe_progress_callback.<locals>.safe_callback'
+[2025-10-07 16:42:58] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 16:42:58] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 16:42:58] 🧹 Starting process cleanup...
+[2025-10-07 16:43:00] 🧹 Process manager cleanup completed
+[2025-10-07 16:43:00] ⚠️ ImageBind not loaded, nothing to release
+[2025-10-07 16:43:00] 🧹 ImageBind manager cleaned up
+[2025-10-07 16:43:00] ✅ Cleanup completed
+[2025-10-07 16:43:12] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 16:43:12] 📝 Main process PID: 154166
+tail: /data/项目/videoagent/backend/log.txt: 文件已截断
+[2025-10-07 16:43:55] 🔄 Returning default configuration from environment variables
+[2025-10-07 16:43:56] ✅ 同步配置 image_bind_model_path -> IMAGEBIND_MODEL_PATH = /data/项目/videoagent/models
+[2025-10-07 16:43:56] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 16:43:56] ✅ 配置同步到环境变量完成
+[2025-10-07 16:43:56] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'asr_model': 'paraformer-v2', 'image_bind_model_path': '/data/项目/videoagent/models', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 16:43:56] ✅ ImageBind manager configured with model path: /data/项目/videoagent/models
+[2025-10-07 16:43:58] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 16:44:00] 📹 Starting video processing from web upload: 1 files
+[2025-10-07 16:44:03] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 16:44:05] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 16:44:05] 🔧 Index worker process 158654 set name to: videorag-index-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 16:44:05] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing'}
+[2025-10-07 16:44:05] 🎤 ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 16:44:05] 🔗 嵌入配置: URL=https://dashscope.aliyuncs.com/compatible-mode/v1, 模型=text-embedding-v4, 维度=1024
+[2025-10-07 16:44:05] 🔍 Session status: {'status': 'processing', 'message': 'Processing video: 1759707563218-0-0-30', 'current_step': 'Starting Video', 'timestamp': 1759826645.4276907}
+[2025-10-07 16:44:05] 📊 Progress: Starting Video - Processing video: 1759707563218-0-0-30
+[2025-10-07 16:44:05] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 1759707563218-0-0-30 into segments', 'current_step': 'Splitting Video', 'timestamp': 1759826645.428358}
+[2025-10-07 16:44:05] 📊 Progress: Splitting Video - Splitting video: 1759707563218-0-0-30 into segments
+[2025-10-07 16:44:06] 🔍 Session status: {'status': 'processing', 'message': 'Video 1759707563218-0-0-30 split into 1 segments', 'current_step': 'Video Split', 'timestamp': 1759826646.6323283}
+[2025-10-07 16:44:06] 📊 Progress: Video Split - Video 1759707563218-0-0-30 split into 1 segments
+[2025-10-07 16:44:06] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'timestamp': 1759826646.632795}
+[2025-10-07 16:44:06] 📊 Progress: Transcribing Audio - Transcribing audio for video: 1759707563218-0-0-30
+[2025-10-07 16:44:07] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826646.632795}
+[2025-10-07 16:44:09] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826646.632795}
+[2025-10-07 16:44:11] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826646.632795}
+[2025-10-07 16:44:13] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826646.632795}
+[2025-10-07 16:44:15] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826646.632795}
+[2025-10-07 16:44:42] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 1/1 (速度: 0.03/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}, 'timestamp': 1759826682.9696906}
+[2025-10-07 16:44:42] 📊 Progress: Transcribing Audio - ASR处理中: 1/1 (速度: 0.03/秒)
+[2025-10-07 16:44:42] 🔍 Session status: {'status': 'processing', 'message': 'Audio transcription completed for video: 1759707563218-0-0-30', 'current_step': 'Audio Transcribed', 'timestamp': 1759826682.9727504}
+[2025-10-07 16:44:42] 📊 Progress: Audio Transcribed - Audio transcription completed for video: 1759707563218-0-0-30
+[2025-10-07 16:44:42] 🔍 Session status: {'status': 'processing', 'message': 'Processing video segments for: 1759707563218-0-0-30', 'current_step': 'Processing Segments', 'timestamp': 1759826682.9733348}
+[2025-10-07 16:44:42] 📊 Progress: Processing Segments - Processing video segments for: 1759707563218-0-0-30
+[2025-10-07 16:44:58] 🔍 Session status: {'status': 'processing', 'message': '开始生成字幕: 1759707563218-0-0-30 (1 个片段)', 'current_step': 'Generating Captions', 'timestamp': 1759826698.5366468}
+[2025-10-07 16:44:58] 📊 Progress: Generating Captions - 开始生成字幕: 1759707563218-0-0-30 (1 个片段)
+[2025-10-07 16:47:06] 🔍 Session status: {'status': 'processing', 'message': '字幕生成完成: 1/1 成功, 耗时 134.89s (速度: 0.01 片段/秒)', 'current_step': 'Captions Generated', 'timestamp': 1759826826.8230376}
+[2025-10-07 16:47:06] 📊 Progress: Captions Generated - 字幕生成完成: 1/1 成功, 耗时 134.89s (速度: 0.01 片段/秒)
+[2025-10-07 16:47:08] 🔍 Session status: {'status': 'processing', 'message': 'Video segments processed and captions generated for: 1759707563218-0-0-30', 'current_step': 'Segments Processed', 'timestamp': 1759826828.6291606}
+[2025-10-07 16:47:08] 📊 Progress: Segments Processed - Video segments processed and captions generated for: 1759707563218-0-0-30
+[2025-10-07 16:47:09] 🔍 Session status: {'status': 'processing', 'message': 'Encoding video features for: 1759707563218-0-0-30', 'current_step': 'Encoding Features', 'timestamp': 1759826829.5585313}
+[2025-10-07 16:47:09] 📊 Progress: Encoding Features - Encoding video features for: 1759707563218-0-0-30
+[2025-10-07 16:47:51] 🔍 Session status: {'status': 'processing', 'message': 'Video features encoded for: 1759707563218-0-0-30', 'current_step': 'Features Encoded', 'timestamp': 1759826871.839118}
+[2025-10-07 16:47:51] 📊 Progress: Features Encoded - Video features encoded for: 1759707563218-0-0-30
+[2025-10-07 16:47:51] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'timestamp': 1759826871.8445323}
+[2025-10-07 16:47:51] 📊 Progress: One Video Completed - Video processing completed: 1759707563218-0-0-30
+[2025-10-07 16:47:51] ✅ Video completed: 1759707563218-0-0-30.mp4
+[2025-10-07 16:48:06] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:08] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:10] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:11] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 16:48:12] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:14] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:16] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:18] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:20] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:22] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:24] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:48:26] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:07] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:09] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:11] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:13] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:14] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 16:49:14] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 16:49:14] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759826954.9344852}
+[2025-10-07 16:49:15] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:17] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:18] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759826954.9344852}
+[2025-10-07 16:49:19] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:19] 🔧 Query worker process 183270 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 16:49:19] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 16:49:19] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 16:49:19] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'VideoRAG' object has no attribute 'caption_model'", 'current_step': 'Error', 'query': '总结下这个视频'}
+[2025-10-07 16:49:19] ❌ Query processing failed: 'VideoRAG' object has no attribute 'caption_model'
+[2025-10-07 16:49:20] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error'}
+[2025-10-07 16:49:20] ❌ Process-based video indexing failed: 'global_config'
+[2025-10-07 16:49:20] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'VideoRAG' object has no attribute 'caption_model'", 'current_step': 'Error', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759826954.9344852}
+[2025-10-07 16:49:21] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 16:49:57] 🔄 Returning default configuration from environment variables
+[2025-10-07 16:54:12] 🔄 配置无变化，跳过同步
+[2025-10-07 16:54:12] 🔄 Updated global config: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'asr_model': 'paraformer-v2', 'image_bind_model_path': '/data/项目/videoagent/models', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 16:54:12] ✅ ImageBind manager configured with model path: /data/项目/videoagent/models
+[2025-10-07 17:04:41] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:04:41] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:04:41] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759827881.9106002}
+[2025-10-07 17:04:46] 🔧 Query worker process 285169 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:04:46] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:04:46] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:04:46] 🔍 Query status: {'status': 'error', 'message': 'Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024', 'current_step': 'Error', 'query': '总结下这个视频'}
+[2025-10-07 17:04:46] ❌ Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024
+[2025-10-07 17:05:02] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 17:06:27] 🔄 配置无变化，跳过同步
+[2025-10-07 17:06:27] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 17:06:43] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:06:43] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:06:43] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759828003.8119893}
+[2025-10-07 17:06:48] 🔧 Query worker process 297472 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:06:48] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:06:48] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:06:48] 🔍 Query status: {'status': 'error', 'message': 'Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024', 'current_step': 'Error', 'query': '总结下这个视频'}
+[2025-10-07 17:06:48] ❌ Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024
+[2025-10-07 17:07:06] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 17:07:18] 🔄 配置无变化，跳过同步
+[2025-10-07 17:07:18] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'base_storage_path': '/data/项目/videoagent/storage', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:07:36] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:07:36] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:07:36] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759828056.986121}
+[2025-10-07 17:07:41] 🔧 Query worker process 302745 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:07:41] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:07:41] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:07:41] 🔍 Query status: {'status': 'error', 'message': 'Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024', 'current_step': 'Error', 'query': '总结下这个视频'}
+[2025-10-07 17:07:41] ❌ Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024
+[2025-10-07 17:08:03] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 17:08:16] 🔄 配置无变化，跳过同步
+[2025-10-07 17:08:16] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'base_storage_path': '/data/项目/videoagent/storage', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'embedding_model_name': 'text-embedding-v4', 'embedding_model_dim': 1024}
+[2025-10-07 17:08:38] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:08:38] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:08:38] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759828118.752757}
+[2025-10-07 17:08:43] 🔧 Query worker process 309419 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:08:43] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:08:43] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:08:43] 🔍 Query status: {'status': 'error', 'message': 'Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024', 'current_step': 'Error', 'query': '总结下这个视频'}
+[2025-10-07 17:08:43] ❌ Query processing failed: Embedding dim mismatch, expected: 1536, but loaded: 1024
+[2025-10-07 17:09:14] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 17:13:02] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:13:02] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:13:02] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759828382.888441}
+[2025-10-07 17:13:07] 🔧 Query worker process 334245 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:13:07] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 总结下这个视频
+[2025-10-07 17:13:07] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:13:11] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'NoneType' object is not subscriptable", 'current_step': 'Error', 'query': '总结下这个视频'}
+[2025-10-07 17:13:11] ❌ Query processing failed: 'NoneType' object is not subscriptable
+[2025-10-07 17:13:48] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759826871.8445323, 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.03 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '21%'}}
+[2025-10-07 17:15:04] Error serving static file api/sessions/8o7fsfrzglhzrt6c1u2isl/query_status: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+[2025-10-07 17:15:57] 🔍 Query data: {'query': '这个视频的主要内容是什么'}
+[2025-10-07 17:15:57] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 这个视频的主要内容是什么
+[2025-10-07 17:15:57] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '这个视频的主要内容是什么', 'answer': None, 'started_at': 1759828557.611647}
+[2025-10-07 17:16:02] 🔧 Query worker process 350742 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:16:02] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 这个视频的主要内容是什么
+[2025-10-07 17:16:02] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'base_storage_path', 'analysisModel', 'processingModel', 'caption_model', 'embedding_api_key', 'embedding_base_url', 'embedding_model_name', 'embedding_model_dim']
+[2025-10-07 17:16:02] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:16:02] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:16:02] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:16:06] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'NoneType' object is not subscriptable", 'current_step': 'Error', 'query': '这个视频的主要内容是什么'}
+[2025-10-07 17:16:06] ❌ Query processing failed: 'NoneType' object is not subscriptable
+[2025-10-07 17:16:44] 🔍 Query data: {'query': '视频讲了什么内容'}
+[2025-10-07 17:16:44] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 视频讲了什么内容
+[2025-10-07 17:16:44] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '视频讲了什么内容', 'answer': None, 'started_at': 1759828604.9209018}
+[2025-10-07 17:16:49] 🔧 Query worker process 355006 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:16:49] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 视频讲了什么内容
+[2025-10-07 17:16:49] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'base_storage_path', 'analysisModel', 'processingModel', 'caption_model', 'embedding_api_key', 'embedding_base_url', 'embedding_model_name', 'embedding_model_dim']
+[2025-10-07 17:16:49] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:16:49] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:16:49] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:16:49] 🔧 Creating VideoRAG instance with working_dir: /data/项目/videoagent/storage/chat-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:16:49] 🔧 VideoRAG LLM config: embedding_func=function, embedding_dim=1024
+[2025-10-07 17:16:53] ✅ VideoRAG instance created successfully
+[2025-10-07 17:16:53] 🔧 VideoRAG attributes: caption_model=True, working_dir=/data/项目/videoagent/storage/chat-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:16:53] 🔧 Starting VideoRAG query with mode='videorag'
+[2025-10-07 17:16:54] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'NoneType' object is not subscriptable", 'current_step': 'Error', 'query': '视频讲了什么内容'}
+[2025-10-07 17:16:54] ❌ Query processing failed: 'NoneType' object is not subscriptable
+[2025-10-07 17:17:56] 🔍 Query data: {'query': '这个视频的主要内容'}
+[2025-10-07 17:17:56] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 这个视频的主要内容
+[2025-10-07 17:17:56] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '这个视频的主要内容', 'answer': None, 'started_at': 1759828676.4873126}
+[2025-10-07 17:18:01] 🔧 Query worker process 361871 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:18:01] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 这个视频的主要内容
+[2025-10-07 17:18:01] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'base_storage_path', 'analysisModel', 'processingModel', 'caption_model', 'embedding_api_key', 'embedding_base_url', 'embedding_model_name', 'embedding_model_dim']
+[2025-10-07 17:18:01] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:18:01] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:18:01] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:18:01] 🔧 Creating VideoRAG instance with working_dir: /data/项目/videoagent/storage/chat-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:18:01] 🔧 VideoRAG LLM config: embedding_func=function, embedding_dim=1024
+[2025-10-07 17:18:05] ✅ VideoRAG instance created successfully
+[2025-10-07 17:18:05] 🔧 VideoRAG attributes: caption_model=True, working_dir=/data/项目/videoagent/storage/chat-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:18:05] 🔧 Starting VideoRAG query with mode='videorag'
+[2025-10-07 17:18:05] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'NoneType' object is not subscriptable", 'current_step': 'Error', 'query': '这个视频的主要内容'}
+[2025-10-07 17:18:05] ❌ Query processing failed: 'NoneType' object is not subscriptable
+[2025-10-07 17:18:05] 🔍 Full traceback:
+Traceback (most recent call last):
+  File "/data/项目/videoagent/backend/videorag_api.py", line 1260, in query_worker_process
+    response = videorag_instance.query(query=query, param=param)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/videorag.py", line 509, in query
+    return loop.run_until_complete(self.aquery(query, param))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/videorag.py", line 513, in aquery
+    response = await videorag_query(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/_op.py", line 604, in videorag_query
+    maybe_trun_chunks = truncate_list_by_token_size(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/_utils.py", line 74, in truncate_list_by_token_size
+    tokens += len(encode_string_by_tiktoken(key(data)))
+                                            ^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/_op.py", line 606, in <lambda>
+    key=lambda x: x["content"],
+                  ~^^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+[2025-10-07 17:20:06] 🔍 Query data: {'query': '这个视频是关于什么的'}
+[2025-10-07 17:20:06] 🚀 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 这个视频是关于什么的
+[2025-10-07 17:20:06] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '这个视频是关于什么的', 'answer': None, 'started_at': 1759828806.6653903}
+[2025-10-07 17:20:11] 🔧 Query worker process 374502 set name to: videorag-query-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:20:11] 🔄 Starting query processing for chat 8o7fsfrzglhzrt6c1u2isl: 这个视频是关于什么的
+[2025-10-07 17:20:11] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'base_storage_path', 'analysisModel', 'processingModel', 'caption_model', 'embedding_api_key', 'embedding_base_url', 'embedding_model_name', 'embedding_model_dim']
+[2025-10-07 17:20:11] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:20:11] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:20:11] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:20:11] 🔧 Creating VideoRAG instance with working_dir: /data/项目/videoagent/storage/chat-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:20:11] 🔧 VideoRAG LLM config: embedding_func=function, embedding_dim=1024
+[2025-10-07 17:20:15] ✅ VideoRAG instance created successfully
+[2025-10-07 17:20:15] 🔧 VideoRAG attributes: caption_model=True, working_dir=/data/项目/videoagent/storage/chat-8o7fsfrzglhzrt6c1u2isl
+[2025-10-07 17:20:15] 🔧 Starting VideoRAG query with mode='videorag'
+[2025-10-07 17:20:15] ⚠️ Could not check chunks: cannot import name 'get_storage_backend' from 'videorag._storage' (/data/项目/videoagent/backend/videorag/_storage/__init__.py)
+[2025-10-07 17:20:16] 🔍 Query status: {'status': 'error', 'message': "Query processing failed: 'NoneType' object is not subscriptable", 'current_step': 'Error', 'query': '这个视频是关于什么的'}
+[2025-10-07 17:20:16] ❌ Query processing failed: 'NoneType' object is not subscriptable
+[2025-10-07 17:20:16] 🔍 Full traceback:
+Traceback (most recent call last):
+  File "/data/项目/videoagent/backend/videorag_api.py", line 1279, in query_worker_process
+    response = videorag_instance.query(query=query, param=param)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/videorag.py", line 509, in query
+    return loop.run_until_complete(self.aquery(query, param))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/videorag.py", line 513, in aquery
+    response = await videorag_query(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/_op.py", line 604, in videorag_query
+    maybe_trun_chunks = truncate_list_by_token_size(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/_utils.py", line 74, in truncate_list_by_token_size
+    tokens += len(encode_string_by_tiktoken(key(data)))
+                                            ^^^^^^^^^
+  File "/data/项目/videoagent/VideoRAG-algorithm/videorag/_op.py", line 606, in <lambda>
+    key=lambda x: x["content"],
+                  ~^^^^^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+
+[2025-10-07 17:42:31] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 17:42:31] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 17:42:31] 🧹 Starting process cleanup...
+[2025-10-07 17:42:33] 🧹 Process manager cleanup completed
+[2025-10-07 17:42:33] ⚠️ ImageBind not loaded, nothing to release
+[2025-10-07 17:42:33] 🧹 ImageBind manager cleaned up
+[2025-10-07 17:42:33] ✅ Cleanup completed
+[2025-10-07 17:42:48] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 17:42:48] 📝 Main process PID: 470300
+tail: /data/项目/videoagent/backend/log.txt: 文件已截断
+[2025-10-07 17:42:56] 🔄 Returning default configuration from environment variables
+[2025-10-07 17:42:58] ✅ 同步配置 image_bind_model_path -> IMAGEBIND_MODEL_PATH = /data/项目/videoagent/models
+[2025-10-07 17:42:58] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 17:42:58] ✅ 配置同步到环境变量完成
+[2025-10-07 17:42:58] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'asr_model': 'paraformer-v2', 'image_bind_model_path': '/data/项目/videoagent/models', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 17:42:58] ✅ ImageBind manager configured with model path: /data/项目/videoagent/models
+[2025-10-07 17:42:59] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 17:43:11] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:43:11] 🚀 Starting query processing for chat 4p8hdxuk9c4y0ajw90zl9: 总结下这个视频
+[2025-10-07 17:43:11] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830191.3381555}
+[2025-10-07 17:43:15] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830191.3381555}
+[2025-10-07 17:43:15] 🔧 Query worker process 473098 set name to: videorag-query-4p8hdxuk9c4y0ajw90zl9
+[2025-10-07 17:43:15] 🔄 Starting query processing for chat 4p8hdxuk9c4y0ajw90zl9: 总结下这个视频
+[2025-10-07 17:43:15] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'analysisModel', 'processingModel', 'caption_model', 'asr_model', 'image_bind_model_path', 'base_storage_path']
+[2025-10-07 17:43:15] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:43:15] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:43:15] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:43:15] 🔧 Creating VideoRAG instance with working_dir: /data/项目/videoagent/storage/chat-4p8hdxuk9c4y0ajw90zl9
+[2025-10-07 17:43:15] 🔧 VideoRAG LLM config: embedding_func=function, embedding_dim=1024
+[2025-10-07 17:43:17] 🔍 Query status: {'status': 'processing', 'message': 'Initializing query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830191.3381555}
+[2025-10-07 17:43:19] 🔍 Query status: {'status': 'processing', 'message': 'Initializing query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830191.3381555}
+[2025-10-07 17:43:19] ✅ VideoRAG instance created successfully
+[2025-10-07 17:43:19] 🔧 VideoRAG attributes: caption_model=True, working_dir=/data/项目/videoagent/storage/chat-4p8hdxuk9c4y0ajw90zl9
+[2025-10-07 17:43:19] 🔧 Starting VideoRAG query with mode='videorag'
+[2025-10-07 17:43:20] ⚠️ Could not check chunks: cannot import name 'get_storage_backend' from 'videorag._storage' (/data/项目/videoagent/backend/videorag/_storage/__init__.py)
+[2025-10-07 17:43:20] ✅ VideoRAG query completed, response type: <class 'str'>
+[2025-10-07 17:43:20] 🔍 Query status: {'status': 'completed', 'message': 'Query processing completed', 'current_step': 'Completed', 'query': '总结下这个视频', 'answer': "Sorry, I'm not able to provide an answer to that question."}
+[2025-10-07 17:43:20] ✅ Query processing completed for chat 4p8hdxuk9c4y0ajw90zl9
+[2025-10-07 17:43:21] 🔍 Query status: {'status': 'completed', 'message': 'Query processing completed', 'current_step': 'Completed', 'query': '总结下这个视频', 'answer': "Sorry, I'm not able to provide an answer to that question.", 'started_at': 1759830191.3381555}
+[2025-10-07 17:48:08] 🔍 Query data: {'query': '测试查询修复效果'}
+[2025-10-07 17:48:08] 🚀 Starting query processing for chat test-fix-1759830488: 测试查询修复效果
+[2025-10-07 17:48:08] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '测试查询修复效果', 'answer': None, 'started_at': 1759830488.338104}
+[2025-10-07 17:48:10] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '测试查询修复效果', 'answer': None, 'started_at': 1759830488.338104}
+[2025-10-07 17:48:12] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '测试查询修复效果', 'answer': None, 'started_at': 1759830488.338104}
+[2025-10-07 17:48:12] 🔧 Query worker process 501046 set name to: videorag-query-test-fix-1759830488
+[2025-10-07 17:48:12] 🔄 Starting query processing for chat test-fix-1759830488: 测试查询修复效果
+[2025-10-07 17:48:12] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'analysisModel', 'processingModel', 'caption_model', 'asr_model', 'image_bind_model_path', 'base_storage_path']
+[2025-10-07 17:48:12] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:48:12] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:48:12] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:48:12] 🔧 Creating VideoRAG instance with working_dir: /data/项目/videoagent/storage/chat-test-fix-1759830488
+[2025-10-07 17:48:12] 🔧 VideoRAG LLM config: embedding_func=function, embedding_dim=1024
+[2025-10-07 17:48:14] 🔍 Query status: {'status': 'processing', 'message': 'Initializing query processing...', 'current_step': 'Initializing', 'query': '测试查询修复效果', 'answer': None, 'started_at': 1759830488.338104}
+[2025-10-07 17:48:16] 🔍 Query status: {'status': 'processing', 'message': 'Initializing query processing...', 'current_step': 'Initializing', 'query': '测试查询修复效果', 'answer': None, 'started_at': 1759830488.338104}
+[2025-10-07 17:48:16] ✅ VideoRAG instance created successfully
+[2025-10-07 17:48:16] 🔧 VideoRAG attributes: caption_model=True, working_dir=/data/项目/videoagent/storage/chat-test-fix-1759830488
+[2025-10-07 17:48:16] 🔧 Starting VideoRAG query with mode='videorag'
+[2025-10-07 17:48:17] ✅ VideoRAG query completed, response type: <class 'str'>
+[2025-10-07 17:48:17] 🔍 Query status: {'status': 'completed', 'message': 'Query processing completed', 'current_step': 'Completed', 'query': '测试查询修复效果', 'answer': "Sorry, I'm not able to provide an answer to that question."}
+[2025-10-07 17:48:17] ✅ Query processing completed for chat test-fix-1759830488
+[2025-10-07 17:48:18] 🔍 Query status: {'status': 'completed', 'message': 'Query processing completed', 'current_step': 'Completed', 'query': '测试查询修复效果', 'answer': "Sorry, I'm not able to provide an answer to that question.", 'started_at': 1759830488.338104}
+[2025-10-07 17:49:37] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 17:49:40] 🔍 Query data: {'query': '总结下这个视频'}
+[2025-10-07 17:49:40] 🚀 Starting query processing for chat 6lcqdyuutl82o1d9504716: 总结下这个视频
+[2025-10-07 17:49:40] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830580.890139}
+[2025-10-07 17:49:44] 🔍 Query status: {'status': 'processing', 'message': 'Starting query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830580.890139}
+[2025-10-07 17:49:45] 🔧 Query worker process 509108 set name to: videorag-query-6lcqdyuutl82o1d9504716
+[2025-10-07 17:49:45] 🔄 Starting query processing for chat 6lcqdyuutl82o1d9504716: 总结下这个视频
+[2025-10-07 17:49:45] 🔧 Global config keys: ['openai_api_key', 'openai_base_url', 'ali_dashscope_api_key', 'ali_dashscope_base_url', 'analysisModel', 'processingModel', 'caption_model', 'asr_model', 'image_bind_model_path', 'base_storage_path']
+[2025-10-07 17:49:45] 🔧 Global config sample: {'openai_api_key': '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', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'analysisModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus'}
+[2025-10-07 17:49:45] 🔗 Query embedding config: {'embedding_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'embedding_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1'}
+[2025-10-07 17:49:45] 🎤 Query ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:49:45] 🔧 Creating VideoRAG instance with working_dir: /data/项目/videoagent/storage/chat-6lcqdyuutl82o1d9504716
+[2025-10-07 17:49:45] 🔧 VideoRAG LLM config: embedding_func=function, embedding_dim=1024
+[2025-10-07 17:49:47] 🔍 Query status: {'status': 'processing', 'message': 'Initializing query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830580.890139}
+[2025-10-07 17:49:49] 🔍 Query status: {'status': 'processing', 'message': 'Initializing query processing...', 'current_step': 'Initializing', 'query': '总结下这个视频', 'answer': None, 'started_at': 1759830580.890139}
+[2025-10-07 17:49:49] ✅ VideoRAG instance created successfully
+[2025-10-07 17:49:49] 🔧 VideoRAG attributes: caption_model=True, working_dir=/data/项目/videoagent/storage/chat-6lcqdyuutl82o1d9504716
+[2025-10-07 17:49:49] 🔧 Starting VideoRAG query with mode='videorag'
+[2025-10-07 17:49:49] ✅ VideoRAG query completed, response type: <class 'str'>
+[2025-10-07 17:49:49] 🔍 Query status: {'status': 'completed', 'message': 'Query processing completed', 'current_step': 'Completed', 'query': '总结下这个视频', 'answer': "Sorry, I'm not able to provide an answer to that question."}
+[2025-10-07 17:49:49] ✅ Query processing completed for chat 6lcqdyuutl82o1d9504716
+[2025-10-07 17:49:51] 🔍 Query status: {'status': 'completed', 'message': 'Query processing completed', 'current_step': 'Completed', 'query': '总结下这个视频', 'answer': "Sorry, I'm not able to provide an answer to that question.", 'started_at': 1759830580.890139}
+[2025-10-07 17:50:17] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 17:50:20] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 17:50:20] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 17:50:20] 🧹 Starting process cleanup...
+[2025-10-07 17:50:23] 🧹 Process manager cleanup completed
+[2025-10-07 17:50:23] ⚠️ ImageBind not loaded, nothing to release
+[2025-10-07 17:50:23] 🧹 ImageBind manager cleaned up
+[2025-10-07 17:50:23] ✅ Cleanup completed
+[2025-10-07 17:50:33] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 17:50:33] 📝 Main process PID: 513462
+[2025-10-07 17:50:36] 🔄 Returning default configuration from environment variables
+[2025-10-07 17:50:38] ✅ 同步配置 image_bind_model_path -> IMAGEBIND_MODEL_PATH = /data/项目/videoagent/models
+[2025-10-07 17:50:38] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 17:50:38] ✅ 配置同步到环境变量完成
+[2025-10-07 17:50:38] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'asr_model': 'paraformer-v2', 'image_bind_model_path': '/data/项目/videoagent/models', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 17:50:38] ✅ ImageBind manager configured with model path: /data/项目/videoagent/models
+[2025-10-07 17:50:40] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 17:50:44] 📹 Starting video processing from web upload: 1 files
+[2025-10-07 17:50:46] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 17:50:48] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 17:50:48] 🔧 Index worker process 514534 set name to: videorag-index-v8gisf63f7wv26diksgdm
+[2025-10-07 17:50:48] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing'}
+[2025-10-07 17:50:48] 🎤 ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 17:50:48] 🔗 嵌入配置: URL=https://dashscope.aliyuncs.com/compatible-mode/v1, 模型=text-embedding-v4, 维度=1024
+[2025-10-07 17:50:50] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 17:50:52] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 17:50:52] 🔍 Session status: {'status': 'processing', 'message': 'Processing video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Starting Video', 'timestamp': 1759830652.5690243}
+[2025-10-07 17:50:52] 📊 Progress: Starting Video - Processing video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 17:50:52] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE into segments', 'current_step': 'Splitting Video', 'timestamp': 1759830652.5698988}
+[2025-10-07 17:50:52] 📊 Progress: Splitting Video - Splitting video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE into segments
+[2025-10-07 17:50:54] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE into segments', 'current_step': 'Splitting Video', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759830652.5698988}
+[2025-10-07 17:50:56] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE into segments', 'current_step': 'Splitting Video', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759830652.5698988}
+[2025-10-07 17:50:58] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE into segments', 'current_step': 'Splitting Video', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759830652.5698988}
+[2025-10-07 17:51:13] 🔍 Session status: {'status': 'processing', 'message': 'Video 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE split into 21 segments', 'current_step': 'Video Split', 'timestamp': 1759830673.6195862}
+[2025-10-07 17:51:13] 📊 Progress: Video Split - Video 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE split into 21 segments
+[2025-10-07 17:51:13] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Transcribing Audio', 'timestamp': 1759830673.620084}
+[2025-10-07 17:51:13] 📊 Progress: Transcribing Audio - Transcribing audio for video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 17:54:20] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 1/21 (速度: 0.01/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 1, 'progress_total': 21, 'progress_percentage': 4.761904761904762, 'processing_speed': '0.01 文件/秒', 'eta': '3732秒', 'resource_usage': {'cpu': '50%', 'memory': '28%'}, 'timestamp': 1759830860.2229886}
+[2025-10-07 17:54:20] 📊 Progress: Transcribing Audio - ASR处理中: 1/21 (速度: 0.01/秒)
+[2025-10-07 17:54:35] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 2/21 (速度: 0.01/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 2, 'progress_total': 21, 'progress_percentage': 9.523809523809524, 'processing_speed': '0.01 文件/秒', 'eta': '1913秒', 'resource_usage': {'cpu': '60%', 'memory': '28%'}, 'timestamp': 1759830875.012956}
+[2025-10-07 17:54:35] 📊 Progress: Transcribing Audio - ASR处理中: 2/21 (速度: 0.01/秒)
+[2025-10-07 17:59:12] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 3/21 (速度: 0.01/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 3, 'progress_total': 21, 'progress_percentage': 14.285714285714285, 'processing_speed': '0.01 文件/秒', 'eta': '2874秒', 'resource_usage': {'cpu': '50%', 'memory': '28%'}, 'timestamp': 1759831152.604986}
+[2025-10-07 17:59:12] 📊 Progress: Transcribing Audio - ASR处理中: 3/21 (速度: 0.01/秒)
+[2025-10-07 17:59:15] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 5/21 (速度: 0.01/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 5, 'progress_total': 21, 'progress_percentage': 23.809523809523807, 'processing_speed': '0.01 文件/秒', 'eta': '1542秒', 'resource_usage': {'cpu': '33%', 'memory': '28%'}, 'timestamp': 1759831155.5288537}
+[2025-10-07 17:59:15] 📊 Progress: Transcribing Audio - ASR处理中: 5/21 (速度: 0.01/秒)
+[2025-10-07 17:59:19] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 7/21 (速度: 0.01/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 7, 'progress_total': 21, 'progress_percentage': 33.33333333333333, 'processing_speed': '0.01 文件/秒', 'eta': '972秒', 'resource_usage': {'cpu': '57%', 'memory': '28%'}, 'timestamp': 1759831159.538797}
+[2025-10-07 17:59:19] 📊 Progress: Transcribing Audio - ASR处理中: 7/21 (速度: 0.01/秒)
+[2025-10-07 17:59:22] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 9/21 (速度: 0.02/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 9, 'progress_total': 21, 'progress_percentage': 42.857142857142854, 'processing_speed': '0.02 文件/秒', 'eta': '652秒', 'resource_usage': {'cpu': '67%', 'memory': '28%'}, 'timestamp': 1759831162.8187048}
+[2025-10-07 17:59:22] 📊 Progress: Transcribing Audio - ASR处理中: 9/21 (速度: 0.02/秒)
+[2025-10-07 17:59:26] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 11/21 (速度: 0.02/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 11, 'progress_total': 21, 'progress_percentage': 52.38095238095239, 'processing_speed': '0.02 文件/秒', 'eta': '448秒', 'resource_usage': {'cpu': '57%', 'memory': '28%'}, 'timestamp': 1759831166.5719573}
+[2025-10-07 17:59:26] 📊 Progress: Transcribing Audio - ASR处理中: 11/21 (速度: 0.02/秒)
+[2025-10-07 17:59:29] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 13/21 (速度: 0.03/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 13, 'progress_total': 21, 'progress_percentage': 61.904761904761905, 'processing_speed': '0.03 文件/秒', 'eta': '305秒', 'resource_usage': {'cpu': '43%', 'memory': '28%'}, 'timestamp': 1759831169.995712}
+[2025-10-07 17:59:29] 📊 Progress: Transcribing Audio - ASR处理中: 13/21 (速度: 0.03/秒)
+[2025-10-07 17:59:33] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 15/21 (速度: 0.03/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 15, 'progress_total': 21, 'progress_percentage': 71.42857142857143, 'processing_speed': '0.03 文件/秒', 'eta': '200秒', 'resource_usage': {'cpu': '60%', 'memory': '28%'}, 'timestamp': 1759831173.5907156}
+[2025-10-07 17:59:33] 📊 Progress: Transcribing Audio - ASR处理中: 15/21 (速度: 0.03/秒)
+[2025-10-07 17:59:37] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 17/21 (速度: 0.03/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 17, 'progress_total': 21, 'progress_percentage': 80.95238095238095, 'processing_speed': '0.03 文件/秒', 'eta': '119秒', 'resource_usage': {'cpu': '50%', 'memory': '28%'}, 'timestamp': 1759831177.262433}
+[2025-10-07 17:59:37] 📊 Progress: Transcribing Audio - ASR处理中: 17/21 (速度: 0.03/秒)
+[2025-10-07 17:59:39] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 18/21 (速度: 0.04/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 18, 'progress_total': 21, 'progress_percentage': 85.71428571428571, 'processing_speed': '0.04 文件/秒', 'eta': '84秒', 'resource_usage': {'cpu': '62%', 'memory': '28%'}, 'timestamp': 1759831179.4236426}
+[2025-10-07 17:59:39] 📊 Progress: Transcribing Audio - ASR处理中: 18/21 (速度: 0.04/秒)
+[2025-10-07 17:59:41] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 19/21 (速度: 0.04/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 19, 'progress_total': 21, 'progress_percentage': 90.47619047619048, 'processing_speed': '0.04 文件/秒', 'eta': '53秒', 'resource_usage': {'cpu': '33%', 'memory': '28%'}, 'timestamp': 1759831181.8529096}
+[2025-10-07 17:59:41] 📊 Progress: Transcribing Audio - ASR处理中: 19/21 (速度: 0.04/秒)
+[2025-10-07 17:59:45] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 21/21 (速度: 0.04/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 21, 'progress_total': 21, 'progress_percentage': 100.0, 'processing_speed': '0.04 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '28%'}, 'timestamp': 1759831185.41179}
+[2025-10-07 17:59:45] 📊 Progress: Transcribing Audio - ASR处理中: 21/21 (速度: 0.04/秒)
+[2025-10-07 17:59:45] 🔍 Session status: {'status': 'processing', 'message': 'Audio transcription completed for video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Audio Transcribed', 'timestamp': 1759831185.4257805}
+[2025-10-07 17:59:45] 📊 Progress: Audio Transcribed - Audio transcription completed for video: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 17:59:45] 🔍 Session status: {'status': 'processing', 'message': 'Processing video segments for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Processing Segments', 'timestamp': 1759831185.4262028}
+[2025-10-07 17:59:45] 📊 Progress: Processing Segments - Processing video segments for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 17:59:58] 🔍 Session status: {'status': 'processing', 'message': '开始生成字幕: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE (21 个片段)', 'current_step': 'Generating Captions', 'timestamp': 1759831198.7669852}
+[2025-10-07 17:59:58] 📊 Progress: Generating Captions - 开始生成字幕: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE (21 个片段)
+[2025-10-07 18:05:26] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 3/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759831526.9697087}
+[2025-10-07 18:05:26] 📊 Progress: Generating Captions - 字幕生成中: 3/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:10:38] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 6/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759831838.5359318}
+[2025-10-07 18:10:38] 📊 Progress: Generating Captions - 字幕生成中: 6/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:15:51] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 9/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759832151.0363252}
+[2025-10-07 18:15:51] 📊 Progress: Generating Captions - 字幕生成中: 9/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:20:36] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 12/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759832436.5051847}
+[2025-10-07 18:20:36] 📊 Progress: Generating Captions - 字幕生成中: 12/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:25:26] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 15/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759832726.3491232}
+[2025-10-07 18:25:26] 📊 Progress: Generating Captions - 字幕生成中: 15/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:30:11] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 18/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759833011.1140685}
+[2025-10-07 18:30:11] 📊 Progress: Generating Captions - 字幕生成中: 18/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:34:18] 🔍 Session status: {'status': 'processing', 'message': '字幕生成中: 21/21 (速度: 0.01 片段/秒)', 'current_step': 'Generating Captions', 'timestamp': 1759833258.3390357}
+[2025-10-07 18:34:18] 📊 Progress: Generating Captions - 字幕生成中: 21/21 (速度: 0.01 片段/秒)
+[2025-10-07 18:34:18] 🔍 Session status: {'status': 'processing', 'message': '字幕生成完成: 21/21 成功, 耗时 2064.15s (速度: 0.01 片段/秒)', 'current_step': 'Captions Generated', 'timestamp': 1759833258.6578653}
+[2025-10-07 18:34:18] 📊 Progress: Captions Generated - 字幕生成完成: 21/21 成功, 耗时 2064.15s (速度: 0.01 片段/秒)
+[2025-10-07 18:35:28] 🔍 Session status: {'status': 'processing', 'message': 'Video segments processed and captions generated for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Segments Processed', 'timestamp': 1759833328.078846}
+[2025-10-07 18:35:28] 📊 Progress: Segments Processed - Video segments processed and captions generated for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 18:35:29] 🔍 Session status: {'status': 'processing', 'message': 'Encoding video features for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Encoding Features', 'timestamp': 1759833329.0809488}
+[2025-10-07 18:35:29] 📊 Progress: Encoding Features - Encoding video features for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 18:43:59] 🔍 Session status: {'status': 'processing', 'message': 'Video features encoded for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'Features Encoded', 'timestamp': 1759833839.2941813}
+[2025-10-07 18:43:59] 📊 Progress: Features Encoded - Video features encoded for: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 18:43:59] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE', 'current_step': 'One Video Completed', 'timestamp': 1759833839.3060791}
+[2025-10-07 18:43:59] 📊 Progress: One Video Completed - Video processing completed: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE
+[2025-10-07 18:43:59] ✅ Video completed: 3 More Ways To ACTUALLY Build Beautiful Websites with Cursor IDE.webm
+[2025-10-07 18:44:00] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error'}
+[2025-10-07 18:44:00] ❌ Process-based video indexing failed: 'global_config'
+[2025-10-07 19:28:27] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759833839.3060791, 'progress_current': 21, 'progress_total': 21, 'progress_percentage': 100.0, 'processing_speed': '0.04 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '28%'}}
+[2025-10-07 19:30:22] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 19:30:41] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 19:30:41] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 19:30:41] 🧹 Starting process cleanup...
+[2025-10-07 19:30:43] 🧹 Process manager cleanup completed
+[2025-10-07 19:30:43] ⚠️ ImageBind not loaded, nothing to release
+[2025-10-07 19:30:43] 🧹 ImageBind manager cleaned up
+[2025-10-07 19:30:43] ✅ Cleanup completed
+tail: /data/项目/videoagent/backend/log.txt: 文件已截断
+[2025-10-07 19:31:01] 🚀 Starting VideoRAG Web API on port 64451
+[2025-10-07 19:31:01] 📝 Main process PID: 935530
+[2025-10-07 19:31:04] 🔄 Returning default configuration from environment variables
+[2025-10-07 19:31:07] ✅ 同步配置 image_bind_model_path -> IMAGEBIND_MODEL_PATH = /data/项目/videoagent/models
+[2025-10-07 19:31:07] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[2025-10-07 19:31:07] ✅ 配置同步到环境变量完成
+[2025-10-07 19:31:07] 🔄 Global config set: {'openai_api_key': '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', 'openai_base_url': 'https://openrouter.ai/api/v1/', 'ali_dashscope_api_key': 'sk-3236ebaa10bc477987e3264e8a8b7d0f', 'ali_dashscope_base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1', 'analysisModel': 'x-ai/grok-code-fast-1', 'processingModel': 'x-ai/grok-code-fast-1', 'caption_model': 'qwen-vl-plus', 'asr_model': 'paraformer-v2', 'image_bind_model_path': '/data/项目/videoagent/models', 'base_storage_path': '/data/项目/videoagent/storage'}
+[2025-10-07 19:31:07] ✅ ImageBind manager configured with model path: /data/项目/videoagent/models
+[2025-10-07 19:31:12] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 19:31:14] 📹 Starting video processing from web upload: 1 files
+[2025-10-07 19:31:16] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 19:31:19] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 19:31:19] 🔧 Index worker process 937099 set name to: videorag-index-8wxp8zjg29fvdghctt0csk
+[2025-10-07 19:31:19] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing'}
+[2025-10-07 19:31:19] 🎤 ASR配置: 模式=local, 模型=paraformer-v2
+[2025-10-07 19:31:19] 🔗 嵌入配置: URL=https://dashscope.aliyuncs.com/compatible-mode/v1, 模型=text-embedding-v4, 维度=1024
+[2025-10-07 19:31:21] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 19:31:23] 🔍 Session status: {'status': 'processing', 'message': 'Initializing AI Assistant...', 'current_step': 'Initializing', 'total_videos': 1, 'processed_videos': 0}
+[2025-10-07 19:31:23] 🔍 Session status: {'status': 'processing', 'message': 'Processing video: 1759707563218-0-0-30', 'current_step': 'Starting Video', 'timestamp': 1759836683.389957}
+[2025-10-07 19:31:23] 📊 Progress: Starting Video - Processing video: 1759707563218-0-0-30
+[2025-10-07 19:31:23] 🔍 Session status: {'status': 'processing', 'message': 'Splitting video: 1759707563218-0-0-30 into segments', 'current_step': 'Splitting Video', 'timestamp': 1759836683.3908432}
+[2025-10-07 19:31:23] 📊 Progress: Splitting Video - Splitting video: 1759707563218-0-0-30 into segments
+[2025-10-07 19:31:24] 🔍 Session status: {'status': 'processing', 'message': 'Video 1759707563218-0-0-30 split into 1 segments', 'current_step': 'Video Split', 'timestamp': 1759836684.6241472}
+[2025-10-07 19:31:24] 📊 Progress: Video Split - Video 1759707563218-0-0-30 split into 1 segments
+[2025-10-07 19:31:24] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'timestamp': 1759836684.6246815}
+[2025-10-07 19:31:24] 📊 Progress: Transcribing Audio - Transcribing audio for video: 1759707563218-0-0-30
+[2025-10-07 19:31:25] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759836684.6246815}
+[2025-10-07 19:31:27] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759836684.6246815}
+[2025-10-07 19:31:29] 🔍 Session status: {'status': 'processing', 'message': 'Transcribing audio for video: 1759707563218-0-0-30', 'current_step': 'Transcribing Audio', 'total_videos': 1, 'processed_videos': 0, 'timestamp': 1759836684.6246815}
+[2025-10-07 19:32:06] 🔍 Session status: {'status': 'processing', 'message': 'ASR处理中: 1/1 (速度: 0.02/秒)', 'current_step': 'Transcribing Audio', 'progress_current': 1, 'progress_total': 1, 'progress_percentage': 100.0, 'processing_speed': '0.02 文件/秒', 'eta': '', 'resource_usage': {'cpu': '0%', 'memory': '30%'}, 'timestamp': 1759836726.238021}
+[2025-10-07 19:32:06] 📊 Progress: Transcribing Audio - ASR处理中: 1/1 (速度: 0.02/秒)
+[2025-10-07 19:32:06] 🔍 Session status: {'status': 'processing', 'message': 'Audio transcription completed for video: 1759707563218-0-0-30', 'current_step': 'Audio Transcribed', 'timestamp': 1759836726.241148}
+[2025-10-07 19:32:06] 📊 Progress: Audio Transcribed - Audio transcription completed for video: 1759707563218-0-0-30
+[2025-10-07 19:32:06] 🔍 Session status: {'status': 'processing', 'message': 'Processing video segments for: 1759707563218-0-0-30', 'current_step': 'Processing Segments', 'timestamp': 1759836726.241588}
+[2025-10-07 19:32:06] 📊 Progress: Processing Segments - Processing video segments for: 1759707563218-0-0-30
+[2025-10-07 19:32:19] 🔍 Session status: {'status': 'processing', 'message': '开始生成字幕: 1759707563218-0-0-30 (1 个片段)', 'current_step': 'Generating Captions', 'timestamp': 1759836739.5410075}
+[2025-10-07 19:32:19] 📊 Progress: Generating Captions - 开始生成字幕: 1759707563218-0-0-30 (1 个片段)
+[2025-10-07 19:32:20] 🔍 Scanning video files in: /data/项目/videoagent/storage
+[2025-10-07 19:34:27] 🔍 Session status: {'status': 'processing', 'message': '字幕生成完成: 1/1 成功, 耗时 132.22s (速度: 0.01 片段/秒)', 'current_step': 'Captions Generated', 'timestamp': 1759836867.4301834}
+[2025-10-07 19:34:27] 📊 Progress: Captions Generated - 字幕生成完成: 1/1 成功, 耗时 132.22s (速度: 0.01 片段/秒)
+[2025-10-07 19:34:29] 🔍 Session status: {'status': 'processing', 'message': 'Video segments processed and captions generated for: 1759707563218-0-0-30', 'current_step': 'Segments Processed', 'timestamp': 1759836869.1373477}
+[2025-10-07 19:34:29] 📊 Progress: Segments Processed - Video segments processed and captions generated for: 1759707563218-0-0-30
+[2025-10-07 19:34:30] 🔍 Session status: {'status': 'processing', 'message': 'Encoding video features for: 1759707563218-0-0-30', 'current_step': 'Encoding Features', 'timestamp': 1759836870.0933805}
+[2025-10-07 19:34:30] 📊 Progress: Encoding Features - Encoding video features for: 1759707563218-0-0-30
+[2025-10-07 19:35:12] 🔍 Session status: {'status': 'processing', 'message': 'Video features encoded for: 1759707563218-0-0-30', 'current_step': 'Features Encoded', 'timestamp': 1759836912.2699788}
+[2025-10-07 19:35:12] 📊 Progress: Features Encoded - Video features encoded for: 1759707563218-0-0-30
+[2025-10-07 19:35:12] 🔍 Session status: {'status': 'processing', 'message': 'Video processing completed: 1759707563218-0-0-30', 'current_step': 'One Video Completed', 'timestamp': 1759836912.2757583}
+[2025-10-07 19:35:12] 📊 Progress: One Video Completed - Video processing completed: 1759707563218-0-0-30
+[2025-10-07 19:35:12] ✅ Video completed: 1759707563218-0-0-30.mp4
+[2025-10-07 19:35:13] 🔍 Session status: {'status': 'error', 'message': "Video indexing failed: 'global_config'", 'current_step': 'Error'}
+[2025-10-07 19:35:13] ❌ Process-based video indexing failed: 'global_config'
+[2025-10-07 19:35:54] 🔔 Received signal 2, initiating shutdown...
+[2025-10-07 19:35:54] 🔔 Received signal 15, initiating shutdown...
+[2025-10-07 19:35:54] 🔔 VideoRAG API server is shutting down...
+[2025-10-07 19:35:54] 🧹 Starting process cleanup...
+[2025-10-07 19:35:56] 🧹 Process manager cleanup completed
+[2025-10-07 19:35:56] ⚠️ ImageBind not loaded, nothing to release
+[2025-10-07 19:35:56] 🧹 ImageBind manager cleaned up
+[2025-10-07 19:35:56] ✅ Cleanup completed
+[2025-10-07 19:40:58] 🔍 开始验证global_config配置...
+[2025-10-07 19:40:58] ⚠️ 发现缺失配置字段，已设置默认值: ['caption_model', 'tiktoken_model_name', 'entity_extract_max_gleaning', 'entity_summary_to_max_tokens', 'max_graph_cluster_size', 'graph_cluster_seed', 'retrieval_topk_chunks', 'fine_num_frames_per_segment', 'video_embedding_batch_num', 'video_embedding_dim']
+[2025-10-07 19:40:58] ⚠️ LLM配置缺失，创建空的LLM配置
+[2025-10-07 19:40:58] ⚠️ 发现缺失的LLM配置字段: ['best_model_func', 'cheap_model_func', 'embedding_func', 'best_model_name', 'cheap_model_name', 'embedding_model_name', 'embedding_dim', 'best_model_max_token_size', 'cheap_model_max_token_size', 'embedding_batch_num']
+[2025-10-07 19:40:58] ⚠️ addon_params配置缺失，创建空配置
+[2025-10-07 19:40:58] ✅ global_config配置验证完成
+[2025-10-07 19:43:39] 🔍 开始验证global_config配置...
+[2025-10-07 19:43:39] ⚠️ 发现缺失配置字段，已设置默认值: ['processingModel', 'caption_model', 'tiktoken_model_name', 'entity_extract_max_gleaning', 'entity_summary_to_max_tokens', 'max_graph_cluster_size', 'graph_cluster_seed', 'retrieval_topk_chunks', 'fine_num_frames_per_segment', 'video_embedding_batch_num', 'video_embedding_dim']
+[2025-10-07 19:43:39] ⚠️ LLM配置缺失，创建空的LLM配置
+[2025-10-07 19:43:39] ⚠️ 发现缺失的LLM配置字段: ['best_model_func', 'cheap_model_func', 'embedding_func', 'best_model_name', 'cheap_model_name', 'embedding_model_name', 'embedding_dim', 'best_model_max_token_size', 'cheap_model_max_token_size', 'embedding_batch_num']
+[2025-10-07 19:43:39] ⚠️ addon_params配置缺失，创建空配置
+[2025-10-07 19:43:39] ✅ global_config配置验证完成
+tail: /data/项目/videoagent/backend/log.txt: 文件已截断

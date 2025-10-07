@@ -1,0 +1,22 @@
+[LOG] 🚀 Starting VideoRAG Web API on port 64451
+[LOG] 📝 Main process PID: 59374
+ * Serving Flask app 'videorag_web_api'
+ * Debug mode: off
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:64451
+ * Running on http://192.168.1.40:64451
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:25:50] "POST /api/config/update HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:26:08] "POST /api/config/update HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [07/Oct/2025 16:26:08] "POST /api/config/update HTTP/1.1" 200 -
+[LOG] ✅ 同步配置 asr_model -> ASR_MODEL = paraformer-v2
+[LOG] ✅ 配置同步到环境变量完成
+[LOG] 🔄 Global config set: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+[LOG] 🔄 配置无变化，跳过同步
+[LOG] 🔄 Updated global config: {'openai_api_key': 'test-key', 'asr_model': 'paraformer-v2'}
+[LOG] 🔔 Received signal 15, initiating shutdown...
+[LOG] 🔔 VideoRAG API server is shutting down...
+[LOG] 🧹 Starting process cleanup...
+[LOG] 🧹 Process manager cleanup completed
+[LOG] ✅ Cleanup completed

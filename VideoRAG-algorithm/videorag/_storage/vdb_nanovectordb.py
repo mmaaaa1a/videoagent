@@ -6,10 +6,53 @@ import numpy as np
 from nano_vectordb import NanoVectorDB
 from tqdm import tqdm
 from imagebind.models import imagebind_model
+from imagebind.models.imagebind_model import ImageBindModel
 
 from .._utils import logger
 from ..base import BaseVectorStorage
-from .._videoutil import encode_video_segments, encode_string_query
+
+
+def get_imagebind_model() -> ImageBindModel:
+    """获取ImageBind模型，优先使用本地模型文件"""
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    # 1. 首先尝试从环境变量配置的路径加载
+    model_path = os.getenv('IMAGEBIND_MODEL_PATH', '/app/models')
+    local_model_file = os.path.join(model_path, 'imagebind.pth')
+
+    if os.path.exists(local_model_file):
+        try:
+            logger.info(f"🔄 从本地加载ImageBind模型: {local_model_file}")
+            embedder = ImageBindModel(
+                vision_embed_dim=1280,
+                vision_num_blocks=32,
+                vision_num_heads=16,
+                text_embed_dim=1024,
+                text_num_blocks=24,
+                text_num_heads=16,
+                out_embed_dim=1024,
+                audio_drop_path=0.1,
+                imu_drop_path=0.7,
+            )
+            embedder.load_state_dict(torch.load(local_model_file, map_location=device))
+            embedder = embedder.to(device)
+            embedder.eval()
+            logger.info(f"✅ 本地ImageBind模型加载成功，设备: {device}")
+            return embedder
+        except Exception as e:
+            logger.warning(f"⚠️ 本地模型加载失败: {e}，尝试在线下载")
+
+    # 2. 如果本地模型不存在或加载失败，使用默认下载方式
+    logger.info("🌐 使用在线方式下载ImageBind模型...")
+    try:
+        embedder = imagebind_model.imagebind_huge(pretrained=True)
+        embedder = embedder.to(device)
+        embedder.eval()
+        logger.info(f"✅ 在线ImageBind模型加载成功，设备: {device}")
+        return embedder
+    except Exception as e:
+        logger.error(f"❌ ImageBind模型加载失败: {e}")
+        raise
 
 
 @dataclass
@@ -91,8 +134,7 @@ class NanoVectorDBVideoSegmentStorage(BaseVectorStorage):
         )
     
     async def upsert(self, video_name, segment_index2name, video_output_format):
-        embedder = imagebind_model.imagebind_huge(pretrained=True).cuda()
-        embedder.eval()
+        embedder = get_imagebind_model()
         
         logger.info(f"Inserting {len(segment_index2name)} segments to {self.namespace}")
         if not len(segment_index2name):
@@ -114,6 +156,9 @@ class NanoVectorDBVideoSegmentStorage(BaseVectorStorage):
             video_paths[i: i + self._max_batch_size]
             for i in range(0, len(video_paths), self._max_batch_size)
         ]
+        # 延迟导入以避免循环依赖
+        from .._videoutil import encode_video_segments
+
         embeddings = []
         for _batch in tqdm(batches, desc=f"Encoding Video Segments {video_name}"):
             batch_embeddings = encode_video_segments(_batch, embedder)
@@ -126,9 +171,11 @@ class NanoVectorDBVideoSegmentStorage(BaseVectorStorage):
         return results
     
     async def query(self, query: str):
-        embedder = imagebind_model.imagebind_huge(pretrained=True).cuda()
-        embedder.eval()
-        
+        # 延迟导入以避免循环依赖
+        from .._videoutil import encode_string_query
+
+        embedder = get_imagebind_model()
+
         embedding = encode_string_query(query, embedder)
         embedding = embedding[0]
         results = self._client.query(

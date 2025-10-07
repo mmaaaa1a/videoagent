@@ -63,36 +63,16 @@ CONFIG_TO_ENV_MAPPING = {
     "embedding_model_dim": "EMBEDDING_MODEL_DIM"
 }
 
-# 添加配置同步去重缓存
-_last_synced_config = {}
-
 def sync_config_to_env(config):
-    """将配置同步到环境变量（带去重逻辑）"""
-    global _last_synced_config
+    """将配置同步到环境变量"""
     try:
-        changed_configs = []
-
         for config_key, env_key in CONFIG_TO_ENV_MAPPING.items():
             if config_key in config:
                 value = config[config_key]
                 if value is not None and value != "":
-                    # 检查配置是否真的发生了变化
-                    current_env_value = os.environ.get(env_key)
-                    str_value = str(value)
-
-                    if current_env_value != str_value:
-                        os.environ[env_key] = str_value
-                        changed_configs.append(f"{config_key} -> {env_key} = {value}")
-                        _last_synced_config[config_key] = str_value
-
-        # 只有当配置真正发生变化时才输出日志
-        if changed_configs:
-            for change in changed_configs:
-                log_to_file(f"✅ 同步配置 {change}")
-            log_to_file("✅ 配置同步到环境变量完成")
-        else:
-            log_to_file("🔄 配置无变化，跳过同步")
-
+                    os.environ[env_key] = str(value)
+                    log_to_file(f"✅ 同步配置 {config_key} -> {env_key} = {value}")
+        log_to_file("✅ 配置同步到环境变量完成")
     except Exception as e:
         log_to_file(f"❌ 配置同步失败: {e}")
         raise
@@ -103,40 +83,10 @@ from videorag import VideoRAG, QueryParam
 # Configure supported video formats
 ALLOWED_EXTENSIONS = {'mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'}
 
-# 日志去重缓存
-_log_cache = {}
-_log_cache_timeout = 2  # 2秒内相同日志只输出一次
-
 # Log recording function
 def log_to_file(message, log_file="log.txt"):
-    """Log messages to file（带去重机制和线程安全）"""
-    global _log_cache
+    """Log messages to file"""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    current_time = time.time()
-
-    # 添加线程ID以区分不同线程的日志
-    import threading
-    thread_id = threading.current_thread().ident
-
-    # 生成日志内容的哈希作为去重键（包含线程信息）
-    import hashlib
-    log_hash = hashlib.md5(f"{thread_id}:{message}".encode()).hexdigest()
-
-    # 检查是否在短时间内重复了相同日志
-    if log_hash in _log_cache:
-        last_time = _log_cache[log_hash]
-        if current_time - last_time < _log_cache_timeout:
-            # 在2秒内重复的日志，跳过输出
-            return
-
-    # 更新缓存
-    _log_cache[log_hash] = current_time
-
-    # 清理过期的缓存条目
-    expired_keys = [key for key, last_time in _log_cache.items()
-                   if current_time - last_time > _log_cache_timeout * 10]
-    for key in expired_keys:
-        del _log_cache[key]
 
     # Ensure the log file is created in the script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -145,8 +95,7 @@ def log_to_file(message, log_file="log.txt"):
     try:
         with open(log_path, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {message}\n")
-        # 只有在非重复的情况下才输出到终端
-        print(f"[LOG] {message}")
+        print(f"[LOG] {message}")  # Add prefix to distinguish
     except Exception as e:
         print(f"[ERROR] Failed to write to log: {e}")
         print(f"[LOG] {message}")  # At least output to console
@@ -187,110 +136,6 @@ def validate_asr_config():
     except Exception as e:
         log_to_file(f"❌ ASR配置验证失败: {str(e)}")
         raise
-
-def validate_and_fix_global_config(global_config):
-    """验证和修复global_config配置，确保包含所有必需字段"""
-    try:
-        log_to_file("🔍 开始验证global_config配置...")
-
-        # 创建配置的副本以避免修改原始对象
-        fixed_config = global_config.copy() if isinstance(global_config, dict) else {}
-
-        # 验证必需的顶级字段
-        required_fields = [
-            'base_storage_path',
-            'analysisModel',
-            'processingModel',
-            'caption_model',
-            'tiktoken_model_name',
-            'entity_extract_max_gleaning',
-            'entity_summary_to_max_tokens',
-            'max_graph_cluster_size',
-            'graph_cluster_seed',
-            'retrieval_topk_chunks',
-            'fine_num_frames_per_segment',
-            'video_embedding_batch_num',
-            'video_embedding_dim'
-        ]
-
-        missing_fields = []
-        for field in required_fields:
-            if field not in fixed_config:
-                # 设置默认值
-                if field == 'tiktoken_model_name':
-                    fixed_config[field] = 'cl100k_base'
-                elif field == 'entity_extract_max_gleaning':
-                    fixed_config[field] = 1
-                elif field == 'entity_summary_to_max_tokens':
-                    fixed_config[field] = 500
-                elif field == 'max_graph_cluster_size':
-                    fixed_config[field] = 10
-                elif field == 'graph_cluster_seed':
-                    fixed_config[field] = 42
-                elif field == 'retrieval_topk_chunks':
-                    fixed_config[field] = 5
-                elif field == 'fine_num_frames_per_segment':
-                    fixed_config[field] = 8
-                elif field == 'video_embedding_batch_num':
-                    fixed_config[field] = 32
-                elif field == 'video_embedding_dim':
-                    fixed_config[field] = 1024
-                else:
-                    fixed_config[field] = fixed_config.get(field, '')
-                missing_fields.append(field)
-
-        if missing_fields:
-            log_to_file(f"⚠️ 发现缺失配置字段，已设置默认值: {missing_fields}")
-
-        # 验证LLM配置结构
-        if 'llm' not in fixed_config or not isinstance(fixed_config['llm'], dict):
-            fixed_config['llm'] = {}
-            log_to_file("⚠️ LLM配置缺失，创建空的LLM配置")
-
-        # 确保LLM配置包含必需的字段
-        llm_required_fields = [
-            'best_model_func',
-            'cheap_model_func',
-            'embedding_func',
-            'best_model_name',
-            'cheap_model_name',
-            'embedding_model_name',
-            'embedding_dim',
-            'best_model_max_token_size',
-            'cheap_model_max_token_size',
-            'embedding_batch_num'
-        ]
-
-        missing_llm_fields = []
-        for field in llm_required_fields:
-            if field not in fixed_config['llm']:
-                missing_llm_fields.append(field)
-
-        if missing_llm_fields:
-            log_to_file(f"⚠️ 发现缺失的LLM配置字段: {missing_llm_fields}")
-
-        # 验证addon_params
-        if 'addon_params' not in fixed_config:
-            fixed_config['addon_params'] = {}
-            log_to_file("⚠️ addon_params配置缺失，创建空配置")
-
-        log_to_file("✅ global_config配置验证完成")
-        return fixed_config
-
-    except Exception as e:
-        log_to_file(f"❌ global_config配置验证失败: {e}")
-        # 如果验证失败，返回基本配置
-        return {
-            'base_storage_path': global_config.get('base_storage_path', '/app/storage'),
-            'analysisModel': global_config.get('analysisModel', 'gpt-4'),
-            'processingModel': global_config.get('processingModel', 'gpt-3.5-turbo'),
-            'caption_model': global_config.get('caption_model', 'qwen-vl-plus'),
-            'tiktoken_model_name': 'cl100k_base',
-            'entity_extract_max_gleaning': 1,
-            'entity_summary_to_max_tokens': 500,
-            'llm': {},
-            'addon_params': {}
-        }
 
 def get_asr_config():
     """获取ASR配置优先从环境变量读取"""
@@ -1013,90 +858,6 @@ def get_process_manager():
         process_manager = VideoRAGProcessManager()
     return process_manager
 
-# Module-level progress callback function to fix pickle serialization issue
-def create_video_progress_callback(chat_id, global_config):
-    """
-    Create a progress callback function for video processing that can be pickled.
-
-    Args:
-        chat_id: Session ID for status updates
-        global_config: Global configuration dictionary
-
-    Returns:
-        A progress callback function that can be serialized
-    """
-    base_storage_path = global_config.get("base_storage_path")
-    _last_progress_update = {"time": 0, "step": "", "message": ""}
-
-    def progress_callback(step_name, message, indexed_video_path=None, progress_info=None):
-        """
-        Enhanced progress callback that supports detailed progress information
-
-        Args:
-            step_name: Current processing step name
-            message: Progress message
-            indexed_video_path: Path of processed video (if completed)
-            progress_info: Dict containing detailed progress data (current, total, percentage, etc.)
-        """
-        nonlocal _last_progress_update
-
-        status_data = {
-            "status": "processing" if step_name != "Completed" else "completed",
-            "message": message,
-            "current_step": step_name
-        }
-
-        # Add detailed progress information if provided
-        if progress_info:
-            status_data.update({
-                "progress_current": progress_info.get("current", 0),
-                "progress_total": progress_info.get("total", 1),
-                "progress_percentage": progress_info.get("percentage", 0),
-                "processing_speed": progress_info.get("speed", ""),
-                "eta": progress_info.get("eta", ""),
-                "resource_usage": progress_info.get("resource_usage", {})
-            })
-
-        # Add timestamp for tracking
-        status_data["timestamp"] = time.time()
-
-        # Intelligent update frequency control
-        current_time = time.time()
-        current_step = status_data.get("current_step", "")
-        current_message = status_data.get("message", "")
-
-        time_diff = current_time - _last_progress_update["time"]
-        content_changed = (current_step != _last_progress_update["step"] or
-                         current_message != _last_progress_update["message"])
-
-        # Update if more than 2 seconds passed or content changed significantly
-        if time_diff >= 2.0 or content_changed:
-            update_session_status(chat_id, base_storage_path, "indexing_status", status_data)
-            _last_progress_update = {
-                "time": current_time,
-                "step": current_step,
-                "message": current_message
-            }
-
-        log_to_file(f"📊 Progress: {step_name} - {message}")
-
-        # If a video is completed, add it to the indexed list
-        if indexed_video_path and step_name == "One Video Completed":
-            add_indexed_video(chat_id, base_storage_path, indexed_video_path)
-            log_to_file(f"✅ Video completed: {os.path.basename(indexed_video_path)}")
-
-    return progress_callback
-
-def add_indexed_video(chat_id, base_storage_path, video_path):
-    """Add video to indexed videos list"""
-    status_file = get_session_status_file(chat_id, base_storage_path)
-    current_status = read_status_json(status_file)
-    if "indexed_videos" not in current_status:
-        current_status["indexed_videos"] = []
-    current_status["indexed_videos"].append(video_path)
-    current_status["last_updated"] = time.time()
-    write_status_json(status_file, current_status)
-
 # Process worker function
 def index_video_worker_process(chat_id, video_path_list, global_config, server_url):
     """Process version of video indexing worker - using JSON status file, removing Queue"""
@@ -1145,7 +906,16 @@ def index_video_worker_process(chat_id, video_path_list, global_config, server_u
                     "message": current_message
                 }
         
-              
+        # Update video list function
+        def add_indexed_video(video_path):
+            status_file = get_session_status_file(chat_id, base_storage_path)
+            current_status = read_status_json(status_file)
+            if "indexed_videos" not in current_status:
+                current_status["indexed_videos"] = []
+            current_status["indexed_videos"].append(video_path)
+            current_status["last_updated"] = time.time()
+            write_status_json(status_file, current_status)
+        
         update_status({
             "status": "processing",
             "message": "Initializing AI Assistant...",
@@ -1205,9 +975,6 @@ def index_video_worker_process(chat_id, video_path_list, global_config, server_u
             "imagebind_client": imagebind_client,
         }
 
-        # 验证和修复global_config配置
-        validated_global_config = validate_and_fix_global_config(global_config)
-
         videorag_instance = VideoRAG(
             llm=videorag_llm_config,
             working_dir=session_working_dir,
@@ -1215,9 +982,45 @@ def index_video_worker_process(chat_id, video_path_list, global_config, server_u
             addon_params=addon_params,  # 传递额外配置
         )
 
-        # Create module-level progress callback to fix pickle serialization issue
-        progress_callback = create_video_progress_callback(chat_id, global_config)
+        # Define enhanced progress callback with detailed progress information
+        def progress_callback(step_name, message, indexed_video_path=None, progress_info=None):
+            """
+            Enhanced progress callback that supports detailed progress information
 
+            Args:
+                step_name: Current processing step name
+                message: Progress message
+                indexed_video_path: Path of processed video (if completed)
+                progress_info: Dict containing detailed progress data (current, total, percentage, etc.)
+            """
+            status_data = {
+                "status": "processing" if step_name != "Completed" else "completed",
+                "message": message,
+                "current_step": step_name
+            }
+
+            # Add detailed progress information if provided
+            if progress_info:
+                status_data.update({
+                    "progress_current": progress_info.get("current", 0),
+                    "progress_total": progress_info.get("total", 1),
+                    "progress_percentage": progress_info.get("percentage", 0),
+                    "processing_speed": progress_info.get("speed", ""),
+                    "eta": progress_info.get("eta", ""),
+                    "resource_usage": progress_info.get("resource_usage", {})
+                })
+
+            # Add timestamp for tracking
+            status_data["timestamp"] = time.time()
+
+            update_status(status_data)
+            log_to_file(f"📊 Progress: {step_name} - {message}")
+
+            # If a video is completed, add it to the indexed list
+            if indexed_video_path and step_name == "One Video Completed":
+                add_indexed_video(indexed_video_path)
+                log_to_file(f"✅ Video completed: {os.path.basename(indexed_video_path)}")
+        
         # Call insert_video
         videorag_instance.insert_video(
             video_path_list=video_path_list,
@@ -1270,9 +1073,7 @@ def query_worker_process(chat_id, query, global_config, server_url):
             update_session_status(chat_id, base_storage_path, "query_status", status_data)
         
         log_to_file(f"🔄 Starting query processing for chat {chat_id}: {query}")
-        log_to_file(f"🔧 Global config keys: {list(global_config.keys()) if global_config else 'None'}")
-        log_to_file(f"🔧 Global config sample: { {k: global_config[k] for k in ['openai_api_key', 'ali_dashscope_api_key', 'analysisModel', 'caption_model'] if k in global_config} if global_config else 'None'}")
-
+        
         # Step 1: Initializing
         update_query_status({
             "status": "processing",
@@ -1296,17 +1097,16 @@ def query_worker_process(chat_id, query, global_config, server_url):
         session_working_dir = os.path.join(base_storage_path, f"chat-{chat_id}")
         assert os.path.exists(session_working_dir), f"Session working directory does not exist: {session_working_dir}"
 
-        # 使用与现有数据匹配的嵌入配置（1024维度）
         videorag_llm_config = LLMConfig(
-            embedding_func_raw=dashscope_embedding,
-            embedding_model_name="text-embedding-v4",
-            embedding_dim=1024,
+            embedding_func_raw=openai_embedding,
+            embedding_model_name="text-embedding-3-small",
+            embedding_dim=1536,
             embedding_max_token_size=8192,
             embedding_batch_num=32,
             embedding_func_max_async=16,
             query_better_than_threshold=0.2,
             best_model_func_raw=gpt_complete,
-            best_model_name=global_config.get("analysisModel"),
+            best_model_name=global_config.get("analysisModel"),    
             best_model_max_token_size=32768,
             best_model_max_async=16,
             cheap_model_func_raw=gpt_complete,
@@ -1317,14 +1117,6 @@ def query_worker_process(chat_id, query, global_config, server_url):
             caption_model_name=global_config.get("caption_model"),
             caption_model_max_async=3
         )
-
-        # 设置DashScope嵌入配置
-        embedding_config = {
-            'embedding_api_key': global_config.get("ali_dashscope_api_key"),
-            'embedding_base_url': global_config.get("ali_dashscope_base_url")
-        }
-        log_to_file(f"🔗 Query embedding config: {embedding_config}")
-        set_dashscope_embedding_config(embedding_config)
 
         # Get ASR configuration for query processing
         asr_config = get_asr_config()
@@ -1340,9 +1132,6 @@ def query_worker_process(chat_id, query, global_config, server_url):
             "imagebind_client": imagebind_client,
         }
 
-        log_to_file(f"🔧 Creating VideoRAG instance with working_dir: {session_working_dir}")
-        log_to_file(f"🔧 VideoRAG LLM config: embedding_func={type(videorag_llm_config.embedding_func_raw).__name__}, embedding_dim={videorag_llm_config.embedding_dim}")
-
         videorag_instance = VideoRAG(
             llm=videorag_llm_config,
             working_dir=session_working_dir,
@@ -1350,23 +1139,17 @@ def query_worker_process(chat_id, query, global_config, server_url):
             addon_params=addon_params,  # 传递额外配置
         )
 
-        log_to_file(f"✅ VideoRAG instance created successfully")
-        log_to_file(f"🔧 VideoRAG attributes: caption_model={hasattr(videorag_instance, 'caption_model')}, working_dir={videorag_instance.working_dir}")
-
         # Step 2: Processing
         update_query_status({
-            "status": "processing",
+            "status": "processing", 
             "message": "Processing your query...",
             "current_step": "Processing",
             "query": query
         })
-
-        log_to_file(f"🔧 Starting VideoRAG query with mode='videorag'")
-
+        
         param = QueryParam(mode="videorag")
         param.wo_reference = True
         response = videorag_instance.query(query=query, param=param)
-        log_to_file(f"✅ VideoRAG query completed, response type: {type(response)}")
 
         # Step 3: Completed
         update_query_status({
@@ -1380,8 +1163,6 @@ def query_worker_process(chat_id, query, global_config, server_url):
         log_to_file(f"✅ Query processing completed for chat {chat_id}")
         
     except Exception as e:
-        import traceback
-        error_traceback = traceback.format_exc()
         base_storage_path = global_config.get("base_storage_path")
         update_session_status(chat_id, base_storage_path, "query_status", {
             "status": "error",
@@ -1390,7 +1171,6 @@ def query_worker_process(chat_id, query, global_config, server_url):
             "query": query
         })
         log_to_file(f"❌ Query processing failed: {str(e)}")
-        log_to_file(f"🔍 Full traceback:\n{error_traceback}")
 
 # Flask application factory function
 def create_app():

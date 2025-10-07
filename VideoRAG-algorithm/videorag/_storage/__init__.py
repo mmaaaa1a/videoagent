@@ -3,3 +3,4 @@ from .gdb_neo4j import Neo4jStorage
 from .vdb_hnswlib import HNSWVectorStorage
 from .vdb_nanovectordb import NanoVectorDBStorage, NanoVectorDBVideoSegmentStorage
 from .kv_json import JsonKVStorage
+from .intermediate_storage import IntermediateStorageManager

@@ -183,10 +183,32 @@ async def _handle_entity_relation_summary(
     description: str,
     global_config: dict,
 ) -> str:
-    use_llm_func: callable = global_config["llm"]["cheap_model_func"]
+    # 验证global_config配置
+    if not isinstance(global_config, dict):
+        raise ValueError(f"global_config必须是字典类型，实际类型: {type(global_config)}")
+
+    # 验证LLM配置
+    if 'llm' not in global_config or not isinstance(global_config['llm'], dict):
+        raise ValueError("global_config缺失或无效的llm配置")
+
+    # 验证必需字段
+    required_fields = ['tiktoken_model_name', 'entity_summary_to_max_tokens']
+    for field in required_fields:
+        if field not in global_config:
+            raise ValueError(f"global_config缺失必需字段: {field}")
+
+    # 验证LLM函数字段
+    if 'cheap_model_func' not in global_config['llm']:
+        raise ValueError("llm配置缺失cheap_model_func字段")
+
+    use_llm_func = global_config["llm"]["cheap_model_func"]
     llm_max_tokens = global_config["llm"]["cheap_model_max_token_size"]
     tiktoken_model_name = global_config["tiktoken_model_name"]
     summary_max_tokens = global_config["entity_summary_to_max_tokens"]
+
+    # 验证函数是否可调用
+    if not callable(use_llm_func):
+        raise ValueError(f"cheap_model_func不是可调用函数: {type(use_llm_func)}")
 
     tokens = encode_string_by_tiktoken(description, model_name=tiktoken_model_name)
     if len(tokens) < summary_max_tokens:  # No need for summary
@@ -359,8 +381,33 @@ async def extract_entities(
     entity_vdb: BaseVectorStorage,
     global_config: dict,
 ) -> Union[BaseGraphStorage, None]:
-    use_llm_func: callable = global_config["llm"]["best_model_func"]
+    # 验证global_config配置
+    if not isinstance(global_config, dict):
+        raise ValueError(f"global_config必须是字典类型，实际类型: {type(global_config)}")
+
+    # 验证必需的顶级字段
+    required_fields = ['entity_extract_max_gleaning']
+    for field in required_fields:
+        if field not in global_config:
+            raise ValueError(f"global_config缺失必需字段: {field}")
+
+    # 验证LLM配置
+    if 'llm' not in global_config:
+        raise ValueError("global_config缺失llm配置")
+
+    if not isinstance(global_config['llm'], dict):
+        raise ValueError(f"llm配置必须是字典类型，实际类型: {type(global_config['llm'])}")
+
+    # 验证LLM函数
+    if 'best_model_func' not in global_config['llm']:
+        raise ValueError("llm配置缺失best_model_func字段")
+
+    use_llm_func = global_config["llm"]["best_model_func"]
     entity_extract_max_gleaning = global_config["entity_extract_max_gleaning"]
+
+    # 验证函数是否可调用
+    if not callable(use_llm_func):
+        raise ValueError(f"best_model_func不是可调用函数: {type(use_llm_func)}")
     
     ordered_chunks = list(chunks.items())
 

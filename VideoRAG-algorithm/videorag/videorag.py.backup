@@ -61,39 +61,6 @@ from ._videoutil import(
     saving_video_segments,
 )
 
-# Global callback registry to handle cross-process communication
-_global_callback_registry = {}
-
-def register_progress_callback(callback_id: str, callback_func):
-    """Register a progress callback function for cross-process access"""
-    _global_callback_registry[callback_id] = callback_func
-
-def get_progress_callback(callback_id: str):
-    """Get a registered progress callback function"""
-    return _global_callback_registry.get(callback_id)
-
-def create_safe_progress_callback(callback_id: str):
-    """
-    Create a safe progress callback function that can be pickled.
-
-    This function returns a wrapper that can be serialized and passed
-    to subprocesses, while maintaining the ability to call the original
-    callback function.
-    """
-    def safe_callback(step_name, message, indexed_video_path=None, progress_info=None):
-        # Try to get the original callback and call it
-        original_callback = get_progress_callback(callback_id)
-        if original_callback:
-            try:
-                original_callback(step_name, message, indexed_video_path, progress_info)
-            except Exception as e:
-                logger.warning(f"Progress callback failed: {e}")
-        else:
-            # Fallback to logging if callback is not available
-            logger.info(f"Progress: {step_name} - {message}")
-
-    return safe_callback
-
 
 @dataclass
 class VideoRAG:
@@ -264,9 +231,6 @@ class VideoRAG:
             partial(self.llm.cheap_model_func, hashing_kv=self.llm_response_cache)
         )
 
-        # 初始化字幕模型 - 确保查询时有caption_model可用
-        self.load_caption_model()
-
     def insert_video(self, video_path_list=None, progress_callback=None, session_id=None):
         loop = always_get_an_event_loop()
         for video_path in video_path_list:
@@ -315,7 +279,6 @@ class VideoRAG:
             # Step3: saving video segments **as well as** obtain caption with vision language model
             if progress_callback:
                 progress_callback("Processing Segments", f"Processing video segments for: {video_name}", None)
-
             manager = multiprocessing.Manager()
             captions = manager.dict()
             error_queue = manager.Queue()
@@ -334,9 +297,6 @@ class VideoRAG:
                 )
             )
 
-            # 创建进度报告队列
-            progress_queue = manager.Queue()
-
             process_segment_caption = multiprocessing.Process(
                 target=segment_caption,
                 args=(
@@ -349,37 +309,14 @@ class VideoRAG:
                     error_queue,
                     session_id,
                     self.working_dir,
-                    progress_queue,  # 使用进度队列替代回调函数
+                    progress_callback,
                 )
             )
 
             process_saving_video_segments.start()
             process_segment_caption.start()
-
-            # 在等待字幕生成完成时，监听进度队列
-            while process_segment_caption.is_alive():
-                # 检查进度队列，非阻塞方式
-                try:
-                    progress_info = progress_queue.get(timeout=0.1)
-                    if progress_callback and progress_info:
-                        step_name, message = progress_info
-                        progress_callback(step_name, message, None)
-                except:
-                    # 队列为空或超时，继续等待
-                    pass
-
             process_saving_video_segments.join()
             process_segment_caption.join()
-
-            # 最后检查一次进度队列
-            try:
-                while not progress_queue.empty():
-                    progress_info = progress_queue.get_nowait()
-                    if progress_callback and progress_info:
-                        step_name, message = progress_info
-                        progress_callback(step_name, message, None)
-            except:
-                pass
 
             if progress_callback:
                 progress_callback("Segments Processed", f"Video segments processed and captions generated for: {video_name}", None)
@@ -401,7 +338,6 @@ class VideoRAG:
                 working_dir=self.working_dir,
                 video_name=video_name
             )
-    
             manager.shutdown()
             loop.run_until_complete(self.video_segments.upsert(
                 {video_name: segments_information}
@@ -573,24 +509,11 @@ class VideoRAG:
 
             # ---------- extract/summary entity and upsert to graph
             logger.info("[Entity Extraction]...")
-            # 构建正确的global_config结构，确保llm字段正确嵌套且包含函数
-            global_config = asdict(self)
-            # 手动添加llm配置，确保包含可调用的函数
-            global_config["llm"] = {
-                **asdict(self.llm),
-                "best_model_func": self.llm.best_model_func,
-                "cheap_model_func": self.llm.cheap_model_func,
-                "embedding_func": self.llm.embedding_func,
-            }
-
-            # 验证配置完整性并修复缺失字段
-            global_config = self._validate_and_fix_global_config(global_config)
-
             maybe_new_kg, _, _ = await self.entity_extraction_func(
                 inserting_chunks,
                 knowledge_graph_inst=self.chunk_entity_relation_graph,
                 entity_vdb=self.entities_vdb,
-                global_config=global_config,
+                global_config=asdict(self),
             )
             if maybe_new_kg is None:
                 logger.warning("No new entities found")
@@ -647,100 +570,3 @@ class VideoRAG:
                 continue
             tasks.append(cast(StorageNameSpace, storage_inst).index_done_callback())
         await asyncio.gather(*tasks)
-
-    def _validate_and_fix_global_config(self, global_config):
-        """验证和修复global_config配置"""
-        try:
-            import logging
-            logger = logging.getLogger(__name__)
-
-            logger.info("🔍 VideoRAG: 验证global_config配置...")
-
-            # 确保基本字段存在
-            required_fields = [
-                'entity_extract_max_gleaning',
-                'entity_summary_to_max_tokens',
-                'tiktoken_model_name',
-                'max_graph_cluster_size',
-                'graph_cluster_seed',
-                'retrieval_topk_chunks',
-                'fine_num_frames_per_segment',
-                'video_embedding_batch_num',
-                'video_embedding_dim'
-            ]
-
-            missing_fields = []
-            for field in required_fields:
-                if field not in global_config:
-                    # 设置默认值
-                    if field == 'tiktoken_model_name':
-                        global_config[field] = 'cl100k_base'
-                    elif field == 'entity_extract_max_gleaning':
-                        global_config[field] = 1
-                    elif field == 'entity_summary_to_max_tokens':
-                        global_config[field] = 500
-                    elif field == 'max_graph_cluster_size':
-                        global_config[field] = 10
-                    elif field == 'graph_cluster_seed':
-                        global_config[field] = 42
-                    elif field == 'retrieval_topk_chunks':
-                        global_config[field] = 5
-                    elif field == 'fine_num_frames_per_segment':
-                        global_config[field] = 8
-                    elif field == 'video_embedding_batch_num':
-                        global_config[field] = 32
-                    elif field == 'video_embedding_dim':
-                        global_config[field] = 1024
-                    else:
-                        global_config[field] = getattr(self, field, None)
-                    missing_fields.append(field)
-
-            if missing_fields:
-                logger.warning(f"⚠️ VideoRAG: 补充缺失配置字段: {missing_fields}")
-
-            # 验证LLM配置
-            if 'llm' not in global_config:
-                global_config['llm'] = {}
-                logger.warning("⚠️ VideoRAG: 创建缺失的llm配置")
-
-            # 确保LLM配置包含所有必需字段
-            llm_config = global_config['llm']
-            llm_required_fields = [
-                'best_model_func', 'cheap_model_func', 'embedding_func',
-                'best_model_name', 'cheap_model_name', 'embedding_model_name',
-                'best_model_max_token_size', 'cheap_model_max_token_size',
-                'embedding_batch_num', 'embedding_max_token_size',
-                'embedding_func_max_async', 'best_model_max_async', 'cheap_model_max_async'
-            ]
-
-            missing_llm_fields = []
-            for field in llm_required_fields:
-                if field not in llm_config:
-                    # 尝试从self.llm获取
-                    if hasattr(self.llm, field):
-                        llm_config[field] = getattr(self.llm, field)
-                    else:
-                        # 设置默认值
-                        if field.endswith('_max_token_size'):
-                            llm_config[field] = 32768
-                        elif field.endswith('_max_async'):
-                            llm_config[field] = 16
-                        elif field.endswith('_batch_num'):
-                            llm_config[field] = 32
-                        elif field.endswith('_max_token_size'):
-                            llm_config[field] = 8192
-                        else:
-                            llm_config[field] = ''
-                    missing_llm_fields.append(field)
-
-            if missing_llm_fields:
-                logger.warning(f"⚠️ VideoRAG: 补充缺失的LLM配置字段: {missing_llm_fields}")
-
-            logger.info("✅ VideoRAG: global_config配置验证完成")
-            return global_config
-
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"❌ VideoRAG: 配置验证失败: {e}")
-            return global_config

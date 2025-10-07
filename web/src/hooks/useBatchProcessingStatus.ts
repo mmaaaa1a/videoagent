@@ -30,7 +30,7 @@ export function useBatchProcessingStatus({
   onVideoCompleted,
   onBatchCompleted,
   onError,
-  pollingInterval = 2000, // 默认2秒轮询
+  pollingInterval = 3000, // 默认3秒轮询，减少服务器压力
   enabled = true
 }: UseBatchProcessingStatusOptions) {
   const [batchState, setBatchState] = useState<BatchProcessingState>({
@@ -165,9 +165,42 @@ export function useBatchProcessingStatus({
     // 立即执行一次
     fetchStatus()
 
-    // 设置定时轮询
-    intervalRef.current = setInterval(fetchStatus, pollingInterval)
-  }, [fetchStatus, pollingInterval])
+    // 智能轮询 - 根据处理状态动态调整频率
+    const adaptivePolling = () => {
+      if (!enabled || !chatId) return
+
+      // 根据当前状态调整轮询间隔
+      const getPollingInterval = () => {
+        const currentStatus = batchState.status
+
+        switch (currentStatus) {
+          case 'processing':
+            // 处理中时使用较短的间隔
+            return Math.max(pollingInterval, 2000) // 最少2秒
+          case 'completed':
+          case 'error':
+          case 'paused':
+            // 非活动状态使用较长的间隔
+            return Math.max(pollingInterval * 2, 5000) // 最少5秒
+          default:
+            return pollingInterval
+        }
+      }
+
+      const currentInterval = getPollingInterval()
+
+      // 清除现有定时器
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+
+      // 设置新的定时器
+      intervalRef.current = setInterval(fetchStatus, currentInterval)
+    }
+
+    // 设置智能轮询
+    adaptivePolling()
+  }, [fetchStatus, pollingInterval, enabled, chatId, batchState.status])
 
   // 停止轮询
   const stopPolling = useCallback(() => {

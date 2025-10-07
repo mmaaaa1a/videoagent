@@ -371,7 +371,7 @@ export default function Settings() {
         processingModel: settings.processingModel,
         caption_model: settings.captionModel,
         asr_model: settings.asrModel,
-        image_bind_model_path: `${settings.imagebindModelDirectory}/imagebind.pth`,
+        image_bind_model_path: settings.imagebindModelDirectory,
         base_storage_path: settings.storeDirectory
       };
 
